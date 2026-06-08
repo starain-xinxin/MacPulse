@@ -62,6 +62,9 @@ struct NetworkCardView: View {
 
             Divider()
 
+            if let ssid = data.ssid, !ssid.isEmpty {
+                MetricRowView(label: "Wi-Fi", value: ssid, icon: "wifi")
+            }
             if let ipv4 = data.localIPv4 {
                 MetricRowView(label: "Local IP", value: ipv4, icon: "pc")
             }

@@ -65,6 +65,9 @@ struct NetworkWidgetView: View {
             smallView
 
             VStack(alignment: .leading, spacing: 4) {
+                if let ssid = entry.networkData.ssid, !ssid.isEmpty {
+                    metricRow("Wi-Fi", ssid)
+                }
                 if let ip = entry.networkData.localIPv4 {
                     metricRow("Local", ip)
                 }
