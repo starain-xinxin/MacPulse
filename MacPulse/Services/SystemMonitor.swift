@@ -24,9 +24,15 @@ final class SystemMonitor {
     var pollingInterval: TimeInterval
 
     init() {
-        // Honor the user's saved polling interval; fall back to the default.
-        let saved = UserDefaults.standard.double(forKey: "pollingInterval")
-        pollingInterval = saved > 0 ? saved : AppConstants.defaultPollingInterval
+        // Honor the saved polling interval. The shared (App Group) value is the
+        // source of truth so the app and widgets agree; fall back to the local
+        // default if neither is set.
+        if let shared = sharedDataManager.sharedPollingInterval {
+            pollingInterval = shared
+        } else {
+            let saved = UserDefaults.standard.double(forKey: "pollingInterval")
+            pollingInterval = saved > 0 ? saved : AppConstants.defaultPollingInterval
+        }
     }
 
     var cpuHistory: [Double] = []
@@ -60,14 +66,27 @@ final class SystemMonitor {
     }
 
     func updatePollingInterval(_ interval: TimeInterval) {
+        guard interval != pollingInterval else { return }
         pollingInterval = interval
+        // Persist to the shared store so widgets reflect the same rate.
+        sharedDataManager.setSharedPollingInterval(interval)
         if isRunning {
             stop()
             start()
         }
     }
 
+    /// Adopt a polling interval chosen from a widget's configuration (written to
+    /// the App Group) if it differs from the current one.
+    private func reconcileSharedInterval() {
+        guard let shared = sharedDataManager.sharedPollingInterval, shared != pollingInterval else { return }
+        updatePollingInterval(shared)
+    }
+
     private func poll() async {
+        // Pick up a rate change made from a widget's edit UI.
+        reconcileSharedInterval()
+
         // Propagate current location authorization so the network monitor knows
         // whether it is allowed to read the Wi-Fi SSID this cycle.
         networkMonitor.locationAuthorized = locationManager.isAuthorized

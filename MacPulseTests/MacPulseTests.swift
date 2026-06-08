@@ -49,4 +49,39 @@ struct MacPulseTests {
         #expect(decoded.cpu.overallUsage == 0.5)
         #expect(decoded.memory.totalBytes == 16_000_000_000)
     }
+
+    @Test func networkSparklineIgnoresStalePeakWhenScalingRecentTraffic() {
+        let stalePeak = [4_660_901.0]
+        let oldLowTraffic = Array(repeating: 10_000.0, count: 39)
+        let recentTraffic = Array(repeating: 20_000.0, count: 19) + [1_000_000.0]
+        let samples = stalePeak + oldLowTraffic + recentTraffic
+
+        let zeroBased = SparklineNormalizer.normalizedHeights(data: samples, scale: .zeroBased)
+        let adaptive = SparklineNormalizer.normalizedHeights(
+            data: samples,
+            scale: .adaptiveRange(recentSampleCount: 20)
+        )
+
+        #expect((zeroBased.last ?? 0) < 0.25)
+        #expect((adaptive.last ?? 0) > 0.95)
+    }
+
+    @Test func networkSparklineConvertsUInt64SamplesNumerically() {
+        let samples: [UInt64] = [0, 900_000, 40_000, 1_500_000]
+        let converted = SparklineNormalizer.doubleValues(from: samples)
+
+        #expect(converted == [0, 900_000, 40_000, 1_500_000])
+        #expect(converted.max() == 1_500_000)
+    }
+
+    @Test func networkSparklineShowsVariationOnHighBaselineTraffic() {
+        let samples = [1_000_000.0, 1_120_000.0, 940_000.0, 1_060_000.0, 900_000.0]
+        let adaptive = SparklineNormalizer.normalizedHeights(
+            data: samples,
+            scale: .adaptiveRange(recentSampleCount: 5)
+        )
+
+        let range = (adaptive.max() ?? 0) - (adaptive.min() ?? 0)
+        #expect(range > 0.75)
+    }
 }

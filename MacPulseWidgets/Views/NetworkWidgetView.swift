@@ -32,35 +32,56 @@ struct NetworkWidgetView: View {
         }
     }
 
-    private func speedBadge(_ icon: String, _ color: Color, _ label: String, _ bytes: UInt64) -> some View {
+    private func metricBadge(_ icon: String, _ color: Color, _ label: String, _ value: String, monospaced: Bool = true) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .foregroundStyle(color)
                 .font(.callout)
+                .frame(width: 15)
             VStack(alignment: .leading, spacing: 0) {
                 Text(label)
                     .font(.system(size: 9))
                     .foregroundStyle(.secondary)
-                Text(formatSpeed(bytes))
-                    .font(.system(size: 13, weight: .semibold))
-                    .monospacedDigit()
+                metricValue(value, monospaced: monospaced)
             }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private func metricValue(_ value: String, monospaced: Bool) -> some View {
+        if monospaced {
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .monospacedDigit()
+                .lineLimit(1)
+                .truncationMode(.middle)
+        } else {
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .lineLimit(1)
+                .truncationMode(.middle)
         }
     }
 
-    /// Both series on one shared-scale axis so up/down are directly comparable.
+    private func speedBadge(_ icon: String, _ color: Color, _ label: String, _ bytes: UInt64) -> some View {
+        metricBadge(icon, color, label, formatSpeed(bytes))
+    }
+
+    private var wifiBadge: some View {
+        metricBadge(
+            "wifi",
+            .cyan,
+            "Wi-Fi",
+            entry.networkData.ssid ?? (entry.networkData.isConnected ? "—" : "Offline"),
+            monospaced: false
+        )
+    }
+
+    /// Each series uses the shared network sparkline scaling, which adapts to
+    /// recent traffic instead of letting one stale spike flatten the chart.
     private func chart(height: CGFloat) -> some View {
-        let sharedMax = Double(max(
-            entry.downloadHistory.max() ?? 0,
-            entry.uploadHistory.max() ?? 0,
-            1
-        ))
-        return ZStack {
-            MiniSparkline(values: entry.downloadHistory, color: .blue, height: height)
-                .environment(\.sparklineMax, sharedMax)
-            MiniSparkline(values: entry.uploadHistory, color: .green.opacity(0.85), height: height)
-                .environment(\.sparklineMax, sharedMax)
-        }
+        NetworkSparkline(download: entry.downloadHistory, upload: entry.uploadHistory, height: height)
     }
 
     private var hasHistory: Bool {
@@ -72,10 +93,10 @@ struct NetworkWidgetView: View {
     private var mediumView: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
-            HStack(spacing: 18) {
+            HStack(spacing: 10) {
                 speedBadge("arrow.down.circle.fill", .blue, "Download", entry.networkData.downloadBytesPerSecond)
                 speedBadge("arrow.up.circle.fill", .green, "Upload", entry.networkData.uploadBytesPerSecond)
-                Spacer()
+                wifiBadge
             }
             if hasHistory { chart(height: 30) }
             detailGrid(columns: 2)
@@ -87,15 +108,14 @@ struct NetworkWidgetView: View {
     private var largeView: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
-            HStack(spacing: 24) {
+            HStack(spacing: 14) {
                 speedBadge("arrow.down.circle.fill", .blue, "Download", entry.networkData.downloadBytesPerSecond)
                 speedBadge("arrow.up.circle.fill", .green, "Upload", entry.networkData.uploadBytesPerSecond)
-                Spacer()
+                wifiBadge
             }
             if hasHistory { chart(height: 70) }
             Divider()
             VStack(alignment: .leading, spacing: 7) {
-                detailRow("wifi", "Wi-Fi", entry.networkData.ssid ?? "—")
                 detailRow("pc", "Local", entry.networkData.localIPv4 ?? "—")
                 detailRow("globe", "Public", entry.networkData.publicIP ?? "—")
                 detailRow("location.fill", "Location", entry.networkData.ipLocation ?? "—")
@@ -114,7 +134,6 @@ struct NetworkWidgetView: View {
 
     private func detailGrid(columns: Int) -> some View {
         let items: [(String, String, String)] = [
-            ("wifi", "Wi-Fi", entry.networkData.ssid ?? "—"),
             ("pc", "Local", entry.networkData.localIPv4 ?? "—"),
             ("globe", "Public", entry.networkData.publicIP ?? "—"),
             ("location.fill", "Location", entry.networkData.ipLocation ?? "—"),

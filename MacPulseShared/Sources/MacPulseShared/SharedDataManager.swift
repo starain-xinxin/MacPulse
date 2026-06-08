@@ -30,4 +30,21 @@ public final class SharedDataManager: Sendable {
         guard let ts = defaults?.double(forKey: "lastUpdate"), ts > 0 else { return nil }
         return Date(timeIntervalSince1970: ts)
     }
+
+    // MARK: Shared polling interval
+
+    /// The polling interval (seconds) shared between the app and widgets. The
+    /// widget's configuration writes here; the running app reads it each poll
+    /// and reconciles its timer, so changing the rate from either side keeps
+    /// both in sync. Returns nil if never set.
+    public var sharedPollingInterval: TimeInterval? {
+        let defaults = UserDefaults(suiteName: suiteName)
+        guard let v = defaults?.double(forKey: "pollingInterval"), v > 0 else { return nil }
+        return v
+    }
+
+    public func setSharedPollingInterval(_ interval: TimeInterval) {
+        let defaults = UserDefaults(suiteName: suiteName)
+        defaults?.set(interval, forKey: "pollingInterval")
+    }
 }

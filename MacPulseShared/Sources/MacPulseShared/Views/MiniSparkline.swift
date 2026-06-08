@@ -1,16 +1,64 @@
 import SwiftUI
 
-/// Environment override for the sparkline's Y-axis maximum. Set the same value
-/// on multiple overlaid `MiniSparkline`s to plot them on one shared scale (e.g.
-/// upload vs download). `nil` (default) means auto-scale to the series' own max.
-public struct SparklineMaxKey: EnvironmentKey {
-    public static let defaultValue: Double? = nil
+public enum SparklineScale: Sendable {
+    case zeroBased
+    case adaptiveRange(recentSampleCount: Int = 30, minimumRelativeSpan: Double = 0.10)
 }
 
-public extension EnvironmentValues {
-    var sparklineMax: Double? {
-        get { self[SparklineMaxKey.self] }
-        set { self[SparklineMaxKey.self] = newValue }
+public enum SparklineNormalizer {
+    public static func doubleValues(from values: [UInt64]) -> [Double] {
+        values.map { Double($0) }
+    }
+
+    public static func normalizedHeights(
+        data: [Double],
+        maxValue: Double? = nil,
+        scale: SparklineScale = .zeroBased
+    ) -> [Double] {
+        switch scale {
+        case .zeroBased:
+            let peak = max(maxValue ?? (data.max() ?? 1.0), 0.01)
+            return data.map { clamp($0 / peak) }
+        case let .adaptiveRange(recentSampleCount, minimumRelativeSpan):
+            return adaptiveRangeHeights(
+                data,
+                recentSampleCount: recentSampleCount,
+                minimumRelativeSpan: minimumRelativeSpan
+            )
+        }
+    }
+
+    private static func adaptiveRangeHeights(
+        _ data: [Double],
+        recentSampleCount: Int,
+        minimumRelativeSpan: Double
+    ) -> [Double] {
+        guard !data.isEmpty else { return [] }
+
+        let sampleCount = max(1, recentSampleCount)
+        let recent = Array(data.suffix(sampleCount))
+        let rawLow = max(recent.min() ?? 0, 0)
+        let rawHigh = max(recent.max() ?? 1, 0.01)
+        let rawSpan = rawHigh - rawLow
+        let minimumSpan = max(rawHigh * max(minimumRelativeSpan, 0), 1)
+
+        let low: Double
+        let high: Double
+        if rawSpan < minimumSpan {
+            let midpoint = (rawLow + rawHigh) / 2
+            low = max(0, midpoint - (minimumSpan / 2))
+            high = low + minimumSpan
+        } else {
+            low = rawLow
+            high = rawHigh
+        }
+
+        let span = max(high - low, 0.01)
+        return data.map { clamp(($0 - low) / span) }
+    }
+
+    private static func clamp(_ value: Double) -> Double {
+        min(max(value, 0), 1)
     }
 }
 
@@ -18,43 +66,45 @@ public extension EnvironmentValues {
 /// widget extension so both render identical charts. Mirrors the original
 /// dashboard `SparklineView` look.
 public struct MiniSparkline: View {
-    @Environment(\.sparklineMax) private var environmentMax
-
     private let data: [Double]
     private let color: Color
     private let height: CGFloat
     private let lineWidth: CGFloat
     private let maxValue: Double?
+    private let scale: SparklineScale
 
     public init(
         data: [Double],
         color: Color,
         height: CGFloat = 30,
         lineWidth: CGFloat = 1.5,
-        maxValue: Double? = nil
+        maxValue: Double? = nil,
+        scale: SparklineScale = .zeroBased
     ) {
         self.data = data
         self.color = color
         self.height = height
         self.lineWidth = lineWidth
         self.maxValue = maxValue
-    }
-
-    private var effectiveMax: Double {
-        maxValue ?? environmentMax ?? (data.max() ?? 1.0)
+        self.scale = scale
     }
 
     public var body: some View {
         Canvas { context, size in
-            guard data.count > 1 else { return }
+            let heights = SparklineNormalizer.normalizedHeights(
+                data: data,
+                maxValue: maxValue,
+                scale: scale
+            )
 
-            let peak = max(effectiveMax, 0.01)
-            let stepX = size.width / CGFloat(data.count - 1)
+            guard heights.count > 1 else { return }
+
+            let stepX = size.width / CGFloat(heights.count - 1)
 
             var path = Path()
-            for (index, value) in data.enumerated() {
+            for (index, ratio) in heights.enumerated() {
                 let x = CGFloat(index) * stepX
-                let y = size.height - (CGFloat(value / peak) * size.height)
+                let y = size.height - (CGFloat(ratio) * size.height)
                 if index == 0 {
                     path.move(to: CGPoint(x: x, y: y))
                 } else {
@@ -88,13 +138,59 @@ public extension MiniSparkline {
         values: [UInt64],
         color: Color,
         height: CGFloat = 30,
-        lineWidth: CGFloat = 1.5
+        lineWidth: CGFloat = 1.5,
+        scale: SparklineScale = .adaptiveRange()
     ) {
         self.init(
-            data: values.map(Double.init),
+            data: SparklineNormalizer.doubleValues(from: values),
             color: color,
             height: height,
-            lineWidth: lineWidth
+            lineWidth: lineWidth,
+            scale: scale
         )
+    }
+}
+
+public struct NetworkSparkline: View {
+    private let download: [UInt64]
+    private let upload: [UInt64]
+    private let height: CGFloat
+    private let lineWidth: CGFloat
+    private let recentSampleCount: Int
+
+    public init(
+        download: [UInt64],
+        upload: [UInt64],
+        height: CGFloat = 30,
+        lineWidth: CGFloat = 1.5,
+        recentSampleCount: Int = 30
+    ) {
+        self.download = download
+        self.upload = upload
+        self.height = height
+        self.lineWidth = lineWidth
+        self.recentSampleCount = recentSampleCount
+    }
+
+    public var body: some View {
+        HStack(spacing: 12) {
+            MiniSparkline(
+                values: download,
+                color: .blue,
+                height: height,
+                lineWidth: lineWidth,
+                scale: .adaptiveRange(recentSampleCount: recentSampleCount)
+            )
+            .frame(maxWidth: .infinity)
+
+            MiniSparkline(
+                values: upload,
+                color: .green.opacity(0.85),
+                height: height,
+                lineWidth: lineWidth,
+                scale: .adaptiveRange(recentSampleCount: recentSampleCount)
+            )
+            .frame(maxWidth: .infinity)
+        }
     }
 }

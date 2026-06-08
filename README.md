@@ -66,7 +66,7 @@ MacPulseWidgets/       # WidgetKit extension
 └── Views/             # Widget views for each size family
 ```
 
-**Data flow:** Monitors poll system APIs every 2 seconds → SystemMonitor assembles a `SystemSnapshot` → Dashboard UI updates via `@Observable` → Snapshot is periodically written to App Group JSON → Widgets read it via TimelineProvider.
+**Data flow:** Monitors poll system APIs at the configured interval (default 1s, shared with widgets via the App Group) → SystemMonitor assembles a `SystemSnapshot` → Dashboard UI updates via `@Observable` → Snapshot is written to App Group JSON every poll → Widgets read it via TimelineProvider.
 
 **Key technical details:**
 - IOReport C API (via bridging header + `libIOReport`) for GPU residency and thermal data

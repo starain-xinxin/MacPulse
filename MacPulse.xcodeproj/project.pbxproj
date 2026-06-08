@@ -392,7 +392,7 @@
 				DEVELOPMENT_TEAM = WSFWS47PKT;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MacPulseWidgets/Info.plist;
+				INFOPLIST_FILE = "MacPulseWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MacPulseWidgets;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -425,7 +425,7 @@
 				DEVELOPMENT_TEAM = WSFWS47PKT;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MacPulseWidgets/Info.plist;
+				INFOPLIST_FILE = "MacPulseWidgets-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = MacPulseWidgets;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
