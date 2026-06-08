@@ -1,21 +1,21 @@
-//
-//  MacPulseApp.swift
-//  MacPulse
-//
-//  Created by 袁新宇 on 2026/6/8.
-//
-
 import SwiftUI
-import CoreData
 
 @main
 struct MacPulseApp: App {
-    let persistenceController = PersistenceController.shared
+    @State private var viewModel = DashboardViewModel()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            DashboardView(viewModel: viewModel)
+        }
+        .defaultSize(width: 720, height: 640)
+
+        MenuBarExtra("MacPulse", systemImage: "gauge.with.dots.needle.33percent") {
+            MenuBarView(viewModel: viewModel)
+        }
+
+        Settings {
+            SettingsView()
         }
     }
 }

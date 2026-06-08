@@ -6,7 +6,22 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AA000001AAAA000000000001 /* MacPulseShared in Frameworks */ = {isa = PBXBuildFile; productRef = AA000002AAAA000000000001 /* MacPulseShared */; };
+		AA000003AAAA000000000001 /* MacPulseShared in Frameworks */ = {isa = PBXBuildFile; productRef = AA000004AAAA000000000001 /* MacPulseShared */; };
+		AA000005AAAA000000000001 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000006AAAA000000000001 /* WidgetKit.framework */; };
+		AA000007AAAA000000000001 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000008AAAA000000000001 /* SwiftUI.framework */; };
+		AA000020AAAA000000000001 /* MacPulseWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA000010AAAA000000000001 /* MacPulseWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		AA000021AAAA000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EA757FBD2FD6C5AD00CD7978 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA00000FAAAA000000000001;
+			remoteInfo = MacPulseWidgetsExtension;
+		};
 		EA757FD82FD6C5AE00CD7978 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EA757FBD2FD6C5AD00CD7978 /* Project object */;
@@ -23,13 +38,35 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		AA000022AAAA000000000001 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AA000020AAAA000000000001 /* MacPulseWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		AA000006AAAA000000000001 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		AA000008AAAA000000000001 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		AA000010AAAA000000000001 /* MacPulseWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MacPulseWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA757FC52FD6C5AD00CD7978 /* MacPulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacPulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA757FD72FD6C5AE00CD7978 /* MacPulseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacPulseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA757FE12FD6C5AE00CD7978 /* MacPulseUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacPulseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		AA000011AAAA000000000001 /* MacPulseWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MacPulseWidgets;
+			sourceTree = "<group>";
+		};
 		EA757FC72FD6C5AD00CD7978 /* MacPulse */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MacPulse;
@@ -48,10 +85,21 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AA000012AAAA000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000005AAAA000000000001 /* WidgetKit.framework in Frameworks */,
+				AA000007AAAA000000000001 /* SwiftUI.framework in Frameworks */,
+				AA000003AAAA000000000001 /* MacPulseShared in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EA757FC22FD6C5AD00CD7978 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA000001AAAA000000000001 /* MacPulseShared in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +120,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AA000009AAAA000000000001 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AA000006AAAA000000000001 /* WidgetKit.framework */,
+				AA000008AAAA000000000001 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		EA757FBC2FD6C5AD00CD7978 = {
 			isa = PBXGroup;
 			children = (
 				EA757FC72FD6C5AD00CD7978 /* MacPulse */,
+				AA000011AAAA000000000001 /* MacPulseWidgets */,
 				EA757FDA2FD6C5AE00CD7978 /* MacPulseTests */,
 				EA757FE42FD6C5AE00CD7978 /* MacPulseUITests */,
+				AA000009AAAA000000000001 /* Frameworks */,
 				EA757FC62FD6C5AD00CD7978 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,6 +147,7 @@
 				EA757FC52FD6C5AD00CD7978 /* MacPulse.app */,
 				EA757FD72FD6C5AE00CD7978 /* MacPulseTests.xctest */,
 				EA757FE12FD6C5AE00CD7978 /* MacPulseUITests.xctest */,
+				AA000010AAAA000000000001 /* MacPulseWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +155,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AA00000FAAAA000000000001 /* MacPulseWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000018AAAA000000000001 /* Build configuration list for PBXNativeTarget "MacPulseWidgetsExtension" */;
+			buildPhases = (
+				AA000013AAAA000000000001 /* Sources */,
+				AA000012AAAA000000000001 /* Frameworks */,
+				AA000014AAAA000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA000011AAAA000000000001 /* MacPulseWidgets */,
+			);
+			name = MacPulseWidgetsExtension;
+			packageProductDependencies = (
+				AA000004AAAA000000000001 /* MacPulseShared */,
+			);
+			productName = MacPulseWidgetsExtension;
+			productReference = AA000010AAAA000000000001 /* MacPulseWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		EA757FC42FD6C5AD00CD7978 /* MacPulse */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EA757FEB2FD6C5AE00CD7978 /* Build configuration list for PBXNativeTarget "MacPulse" */;
@@ -102,16 +185,19 @@
 				EA757FC12FD6C5AD00CD7978 /* Sources */,
 				EA757FC22FD6C5AD00CD7978 /* Frameworks */,
 				EA757FC32FD6C5AD00CD7978 /* Resources */,
+				AA000022AAAA000000000001 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AA000023AAAA000000000001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EA757FC72FD6C5AD00CD7978 /* MacPulse */,
 			);
 			name = MacPulse;
 			packageProductDependencies = (
+				AA000002AAAA000000000001 /* MacPulseShared */,
 			);
 			productName = MacPulse;
 			productReference = EA757FC52FD6C5AD00CD7978 /* MacPulse.app */;
@@ -173,6 +259,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					AA00000FAAAA000000000001 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 					EA757FC42FD6C5AD00CD7978 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -195,6 +284,9 @@
 			);
 			mainGroup = EA757FBC2FD6C5AD00CD7978;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA00000AAAAA000000000001 /* XCLocalSwiftPackageReference "MacPulseShared" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EA757FC62FD6C5AD00CD7978 /* Products */;
 			projectDirPath = "";
@@ -203,11 +295,19 @@
 				EA757FC42FD6C5AD00CD7978 /* MacPulse */,
 				EA757FD62FD6C5AE00CD7978 /* MacPulseTests */,
 				EA757FE02FD6C5AE00CD7978 /* MacPulseUITests */,
+				AA00000FAAAA000000000001 /* MacPulseWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		AA000014AAAA000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EA757FC32FD6C5AD00CD7978 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,6 +332,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AA000013AAAA000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EA757FC12FD6C5AD00CD7978 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -256,6 +363,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AA000023AAAA000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA00000FAAAA000000000001 /* MacPulseWidgetsExtension */;
+			targetProxy = AA000021AAAA000000000001 /* PBXContainerItemProxy */;
+		};
 		EA757FD92FD6C5AE00CD7978 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EA757FC42FD6C5AD00CD7978 /* MacPulse */;
@@ -269,6 +381,70 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		AA000015AAAA000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MacPulseWidgets/MacPulseWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WSFWS47PKT;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MacPulseWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = starain.MacPulse.MacPulseWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AA000016AAAA000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MacPulseWidgets/MacPulseWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = WSFWS47PKT;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MacPulseWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = starain.MacPulse.MacPulseWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		EA757FE92FD6C5AE00CD7978 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -394,6 +570,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MacPulse/MacPulse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -404,11 +581,13 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationUsageDescription = "MacPulse uses your location for geolocation display.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-lIOReport";
 				PRODUCT_BUNDLE_IDENTIFIER = starain.MacPulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -416,6 +595,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "MacPulse/MacPulse-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -426,6 +606,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MacPulse/MacPulse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -436,11 +617,13 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocationUsageDescription = "MacPulse uses your location for geolocation display.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-lIOReport";
 				PRODUCT_BUNDLE_IDENTIFIER = starain.MacPulse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -448,6 +631,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "MacPulse/MacPulse-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -536,6 +720,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AA000018AAAA000000000001 /* Build configuration list for PBXNativeTarget "MacPulseWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA000015AAAA000000000001 /* Debug */,
+				AA000016AAAA000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		EA757FC02FD6C5AD00CD7978 /* Build configuration list for PBXProject "MacPulse" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -573,6 +766,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AA00000AAAAA000000000001 /* XCLocalSwiftPackageReference "MacPulseShared" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = MacPulseShared;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA000002AAAA000000000001 /* MacPulseShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MacPulseShared;
+		};
+		AA000004AAAA000000000001 /* MacPulseShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MacPulseShared;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EA757FBD2FD6C5AD00CD7978 /* Project object */;
 }

@@ -1,0 +1,111 @@
+# MacPulse
+
+A lightweight, native macOS system monitor for Apple Silicon MacBooks.
+
+Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift calling macOS system APIs directly, keeping CPU and memory overhead minimal.
+
+## Features
+
+- **CPU Monitoring** — Overall and per-core usage with real-time sparkline charts
+- **Memory Monitoring** — Used/free/active/wired/compressed breakdown, memory pressure, swap usage
+- **Disk Monitoring** — Capacity and usage for all mounted local volumes
+- **Network Monitoring** — Upload/download speed, total traffic, interface type, local IP
+- **Battery Monitoring** — Charge level, health percentage, cycle count, temperature, time remaining
+- **GPU Monitoring** — Active usage via IOReport API (Apple Silicon integrated GPU)
+- **Thermal Monitoring** — CPU temperature, system thermal pressure level
+- **System Info** — Model, chip name, macOS version, uptime
+
+### App Interfaces
+
+| Interface | Description |
+|-----------|-------------|
+| **Dashboard Window** | Main window with a grid of metric cards, gauges, and sparklines |
+| **Menu Bar** | MenuBarExtra showing key metrics at a glance |
+| **Desktop Widgets** | 5 WidgetKit widgets (CPU, Memory, Battery, Network, System Overview) in small/medium/large sizes |
+| **Settings** | Polling interval, temperature unit, launch at login |
+
+## Screenshots
+
+> Screenshots will be added after the UI is stabilized.
+
+## Requirements
+
+- macOS 15.0+
+- Apple Silicon (M1/M2/M3/M4 series)
+- Xcode 16.0+ to build
+
+## Building
+
+```bash
+git clone https://github.com/starain-xinxin/MacPulse.git
+cd MacPulse
+open MacPulse.xcodeproj
+```
+
+Select the **MacPulse** scheme, then `Cmd+R` to build and run.
+
+The project has zero third-party dependencies — it uses only Apple frameworks:
+- SwiftUI, WidgetKit, IOKit, Network, ServiceManagement, CoreLocation
+
+## Architecture
+
+```
+MacPulse.app
+├── Services/          # System API monitors (CPU, Memory, Disk, Network, Battery, GPU, Thermal)
+├── ViewModels/        # @Observable view models driving the UI
+├── Views/             # SwiftUI dashboard cards, components, menu bar, settings
+└── Utilities/         # Formatters, constants
+
+MacPulseShared/        # Local Swift package shared between app and widget extension
+├── Models/            # Codable data models (SystemSnapshot, CPUData, MemoryData, etc.)
+└── SharedDataManager  # App Group read/write for widget data sharing
+
+MacPulseWidgets/       # WidgetKit extension
+├── Providers/         # Timeline providers reading from App Group
+├── Widgets/           # Widget configurations
+└── Views/             # Widget views for each size family
+```
+
+**Data flow:** Monitors poll system APIs every 2 seconds → SystemMonitor assembles a `SystemSnapshot` → Dashboard UI updates via `@Observable` → Snapshot is periodically written to App Group JSON → Widgets read it via TimelineProvider.
+
+**Key technical details:**
+- IOReport C API (via bridging header + `libIOReport`) for GPU residency and thermal data
+- `host_processor_info()` / `host_statistics64()` for CPU and memory
+- `getifaddrs()` for network traffic bytes and local IPs
+- `IOPSCopyPowerSourcesInfo` + IOKit registry for battery details
+- App Group (`group.starain.MacPulse`) for widget data sharing
+
+## Roadmap
+
+This is an early-stage build. The core monitoring infrastructure works, but there are known issues and many planned improvements:
+
+### Known Issues
+
+- [ ] Desktop widgets cannot be added (widget target configuration needs debugging in Xcode)
+- [ ] Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable
+- [ ] Public IP / geolocation not displaying (IP-API fetch needs error handling and HTTPS migration)
+- [ ] Only local IP is shown; Wi-Fi SSID name is not retrieved
+- [ ] GPU usage always reads 0% (IOReport subscription/sampling logic needs debugging on specific M-series chips)
+- [ ] CPU temperature may not display (IOKit sensor paths vary across M1/M2/M3/M4 models)
+
+### Planned Features
+
+- [ ] **Top processes** — Show top CPU/memory consuming processes per metric card (via `sysctl` / `proc_pidinfo`)
+- [ ] **Network details** — Wi-Fi SSID display, public IP with geolocation, optional CoreLocation integration
+- [ ] **Draggable dashboard** — Let users reorder and resize metric cards
+- [ ] **Responsive layout** — Adaptive grid that works well from compact to wide window sizes
+- [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
+- [ ] **GPU monitoring fix** — Debug and fix IOReport GPU Stats channel sampling for each M-series generation
+- [ ] **Temperature sensors** — Map correct IOKit/IOHIDSensor paths for each Apple Silicon chip variant
+- [ ] **Widget refresh** — Ensure widgets properly read and display App Group data
+- [ ] **Notification alerts** — Optional alerts when CPU/memory/disk exceeds thresholds
+- [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
+- [ ] **Localization** — Chinese (Simplified) and English UI
+
+## License
+
+MIT
+
+## Acknowledgments
+
+- IOReport API usage inspired by [socpowerbuddy](https://github.com/BitesPotatoBacks/SocPowerBuddy) and [asitop](https://github.com/tlkh/asitop)
