@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import MacPulseShared
 
 struct CardContainer<Content: View>: View {
@@ -25,49 +26,26 @@ struct CardContainer<Content: View>: View {
 
 struct DashboardView: View {
     @Bindable var viewModel: DashboardViewModel
-
-    private let columns = [
-        GridItem(.flexible(minimum: 280), spacing: 16),
-        GridItem(.flexible(minimum: 280), spacing: 16),
-    ]
+    @State private var draggingCard: CardType?
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 systemInfoHeader
 
-                LazyVGrid(columns: columns, spacing: 16) {
-                    CPUCardView(
-                        data: viewModel.snapshot.cpu,
-                        thermal: viewModel.snapshot.thermal,
-                        history: viewModel.cpuHistory,
-                        useFahrenheit: viewModel.useFahrenheit
-                    )
-
-                    MemoryCardView(
-                        data: viewModel.snapshot.memory,
-                        history: viewModel.memoryHistory
-                    )
-
-                    GPUCardView(
-                        data: viewModel.snapshot.gpu,
-                        thermal: viewModel.snapshot.thermal,
-                        useFahrenheit: viewModel.useFahrenheit
-                    )
-
-                    DiskCardView(disks: viewModel.snapshot.disks)
-
-                    NetworkCardView(
-                        data: viewModel.snapshot.network,
-                        downloadHistory: viewModel.downloadHistory,
-                        uploadHistory: viewModel.uploadHistory
-                    )
-
-                    if let battery = viewModel.snapshot.battery {
-                        BatteryCardView(
-                            data: battery,
-                            useFahrenheit: viewModel.useFahrenheit
-                        )
+                MasonryLayout(columns: 2, spacing: 16) {
+                    ForEach(viewModel.visibleCards) { card in
+                        cardView(for: card)
+                            .opacity(draggingCard == card ? 0.4 : 1.0)
+                            .onDrag {
+                                draggingCard = card
+                                return NSItemProvider(object: card.rawValue as NSString)
+                            }
+                            .onDrop(of: [.text], delegate: CardDropDelegate(
+                                card: card,
+                                viewModel: viewModel,
+                                draggingCard: $draggingCard
+                            ))
                     }
                 }
             }
@@ -75,6 +53,45 @@ struct DashboardView: View {
         }
         .frame(minWidth: 600, minHeight: 500)
         .background(.background)
+    }
+
+    @ViewBuilder
+    private func cardView(for card: CardType) -> some View {
+        switch card {
+        case .cpu:
+            CPUCardView(
+                data: viewModel.snapshot.cpu,
+                thermal: viewModel.snapshot.thermal,
+                history: viewModel.cpuHistory,
+                useFahrenheit: viewModel.useFahrenheit
+            )
+        case .memory:
+            MemoryCardView(
+                data: viewModel.snapshot.memory,
+                history: viewModel.memoryHistory
+            )
+        case .gpu:
+            GPUCardView(
+                data: viewModel.snapshot.gpu,
+                thermal: viewModel.snapshot.thermal,
+                useFahrenheit: viewModel.useFahrenheit
+            )
+        case .disk:
+            DiskCardView(disks: viewModel.snapshot.disks)
+        case .network:
+            NetworkCardView(
+                data: viewModel.snapshot.network,
+                downloadHistory: viewModel.downloadHistory,
+                uploadHistory: viewModel.uploadHistory
+            )
+        case .battery:
+            if let battery = viewModel.snapshot.battery {
+                BatteryCardView(
+                    data: battery,
+                    useFahrenheit: viewModel.useFahrenheit
+                )
+            }
+        }
     }
 
     private var systemInfoHeader: some View {
@@ -104,5 +121,29 @@ struct DashboardView: View {
 
             Spacer()
         }
+    }
+}
+
+struct CardDropDelegate: DropDelegate {
+    let card: CardType
+    let viewModel: DashboardViewModel
+    @Binding var draggingCard: CardType?
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingCard = nil
+        return true
+    }
+
+    func dropEntered(info: DropInfo) {
+        guard let source = draggingCard, source != card else { return }
+        viewModel.moveCard(from: source, to: card)
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func validateDrop(info: DropInfo) -> Bool {
+        draggingCard != nil
     }
 }
