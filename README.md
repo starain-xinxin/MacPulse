@@ -82,7 +82,7 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 ### Known Issues
 
 - [ ] Desktop widgets cannot be added (widget target configuration needs debugging in Xcode)
-- [ ] Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable
+- [x] ~~Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable~~ (Fixed: masonry layout + drag-and-drop)
 - [ ] Public IP / geolocation not displaying (IP-API fetch needs error handling and HTTPS migration)
 - [ ] Only local IP is shown; Wi-Fi SSID name is not retrieved
 - [ ] GPU usage always reads 0% (IOReport subscription/sampling logic needs debugging on specific M-series chips)
@@ -92,8 +92,8 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 
 - [ ] **Top processes** — Show top CPU/memory consuming processes per metric card (via `sysctl` / `proc_pidinfo`)
 - [ ] **Network details** — Wi-Fi SSID display, public IP with geolocation, optional CoreLocation integration
-- [ ] **Draggable dashboard** — Let users reorder and resize metric cards
-- [ ] **Responsive layout** — Adaptive grid that works well from compact to wide window sizes
+- [x] ~~**Draggable dashboard**~~ — Cards are now drag-and-drop reorderable with persisted order
+- [x] ~~**Responsive layout**~~ — Custom masonry layout adapts to window width
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
 - [ ] **GPU monitoring fix** — Debug and fix IOReport GPU Stats channel sampling for each M-series generation
 - [ ] **Temperature sensors** — Map correct IOKit/IOHIDSensor paths for each Apple Silicon chip variant
