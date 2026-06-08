@@ -21,8 +21,8 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 |-----------|-------------|
 | **Dashboard Window** | Main window with a grid of metric cards, gauges, and sparklines |
 | **Menu Bar** | MenuBarExtra showing key metrics at a glance |
-| **Desktop Widgets** | 5 WidgetKit widgets (CPU, Memory, Battery, Network, System Overview) in small/medium/large sizes |
-| **Settings** | Polling interval, temperature unit, launch at login |
+| **Desktop Widgets** | 6 WidgetKit widgets (CPU, Memory, Battery, Network, System Overview, CPU·RAM·Disk) with sparkline charts and second-level refresh while the app runs |
+| **Settings** | Polling interval (default 1s, applied live), temperature unit, launch at login |
 
 ## Screenshots
 
@@ -66,7 +66,7 @@ MacPulseWidgets/       # WidgetKit extension
 └── Views/             # Widget views for each size family
 ```
 
-**Data flow:** Monitors poll system APIs every 2 seconds → SystemMonitor assembles a `SystemSnapshot` → Dashboard UI updates via `@Observable` → Snapshot is periodically written to App Group JSON → Widgets read it via TimelineProvider.
+**Data flow:** Monitors poll system APIs at the configured interval (default 1s, shared with widgets via the App Group) → SystemMonitor assembles a `SystemSnapshot` → Dashboard UI updates via `@Observable` → Snapshot is written to App Group JSON every poll → Widgets read it via TimelineProvider.
 
 **Key technical details:**
 - IOReport C API (via bridging header + `libIOReport`) for GPU residency and thermal data
@@ -81,7 +81,7 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 
 ### Known Issues
 
-- [ ] Desktop widgets cannot be added (widget target configuration needs debugging in Xcode)
+- [x] ~~Desktop widgets cannot be added~~ (Fixed: the widget extension's `Info.plist` was missing the `NSExtension` / `NSExtensionPointIdentifier = com.apple.widgetkit-extension` key, so macOS never registered it as a WidgetKit provider)
 - [x] ~~Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable~~ (Fixed: masonry layout + drag-and-drop)
 - [x] ~~Public IP / geolocation not displaying~~ (Fixed: migrated to HTTPS endpoint with `success`/error handling — cleartext HTTP was blocked by App Transport Security)
 - [x] ~~Only local IP is shown; Wi-Fi SSID name is not retrieved~~ (Fixed: SSID via CoreWLAN, gated by CoreLocation authorization required on macOS Sonoma+)
@@ -97,7 +97,8 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
 - [ ] **GPU monitoring fix** — Debug and fix IOReport GPU Stats channel sampling for each M-series generation
 - [ ] **Temperature sensors** — Map correct IOKit/IOHIDSensor paths for each Apple Silicon chip variant
-- [ ] **Widget refresh** — Ensure widgets properly read and display App Group data
+- [x] ~~**Widget refresh**~~ — Widgets read App Group data and now update at **second-level cadence while the app runs**: the app writes a snapshot and reloads timelines every poll, and providers use the `.atEnd` policy. Foreground/active reloads bypass WidgetKit's background budget (after a full quit, the OS background rate applies). Widgets now also show dashboard-style sparkline charts.
+- [x] ~~**Adjustable refresh rate**~~ — Polling interval setting is now wired to the live monitor (default **1s**; the picker previously had no effect)
 - [ ] **Notification alerts** — Optional alerts when CPU/memory/disk exceeds thresholds
 - [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
 - [ ] **Localization** — Chinese (Simplified) and English UI

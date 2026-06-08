@@ -15,7 +15,7 @@ struct MacPulseApp: App {
         }
 
         Settings {
-            SettingsView()
+            SettingsView(viewModel: viewModel)
         }
     }
 }

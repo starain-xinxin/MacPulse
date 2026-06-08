@@ -9,5 +9,6 @@ struct MacPulseWidgetsBundle: WidgetBundle {
         BatteryWidget()
         NetworkWidget()
         SystemOverviewWidget()
+        SystemStatsWidget()
     }
 }

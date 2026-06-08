@@ -28,9 +28,7 @@ struct SystemOverviewProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SystemOverviewEntry>) -> Void) {
-        let entry = makeEntry()
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        completion(Timeline(entries: [makeEntry()], policy: .atEnd))
     }
 
     private func makeEntry() -> SystemOverviewEntry {

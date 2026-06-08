@@ -54,10 +54,7 @@ struct NetworkCardView: View {
             }
 
             if downloadHistory.count > 1 || uploadHistory.count > 1 {
-                ZStack {
-                    SparklineUInt64View(data: downloadHistory, color: .blue, height: 25)
-                    SparklineUInt64View(data: uploadHistory, color: .green.opacity(0.7), height: 25)
-                }
+                NetworkSparkline(download: downloadHistory, upload: uploadHistory, height: 25)
             }
 
             Divider()
@@ -83,17 +80,6 @@ struct NetworkCardView: View {
         case .ethernet: return "cable.connector"
         case .cellular: return "antenna.radiowaves.left.and.right"
         case .other: return "network"
-        }
-    }
-}
-
-extension NetworkData.InterfaceType {
-    var displayName: String {
-        switch self {
-        case .wifi: return "Wi-Fi"
-        case .ethernet: return "Ethernet"
-        case .cellular: return "Cellular"
-        case .other: return "Other"
         }
     }
 }

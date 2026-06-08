@@ -43,7 +43,9 @@ struct CPUWidgetView: View {
             }
             .frame(width: 70, height: 70)
 
-            if let temp = entry.thermalData.cpuTemperature {
+            if entry.history.count > 1 {
+                MiniSparkline(data: entry.history, color: .blue, height: 18, maxValue: 1.0)
+            } else if let temp = entry.thermalData.cpuTemperature {
                 Text(String(format: "%.0f\u{00B0}C", temp))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
