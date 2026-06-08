@@ -1,9 +1,25 @@
 import SwiftUI
 
+/// Environment override for the sparkline's Y-axis maximum. Set the same value
+/// on multiple overlaid `MiniSparkline`s to plot them on one shared scale (e.g.
+/// upload vs download). `nil` (default) means auto-scale to the series' own max.
+public struct SparklineMaxKey: EnvironmentKey {
+    public static let defaultValue: Double? = nil
+}
+
+public extension EnvironmentValues {
+    var sparklineMax: Double? {
+        get { self[SparklineMaxKey.self] }
+        set { self[SparklineMaxKey.self] = newValue }
+    }
+}
+
 /// A compact line+gradient-fill sparkline shared by the dashboard and the
 /// widget extension so both render identical charts. Mirrors the original
 /// dashboard `SparklineView` look.
 public struct MiniSparkline: View {
+    @Environment(\.sparklineMax) private var environmentMax
+
     private let data: [Double]
     private let color: Color
     private let height: CGFloat
@@ -25,7 +41,7 @@ public struct MiniSparkline: View {
     }
 
     private var effectiveMax: Double {
-        maxValue ?? (data.max() ?? 1.0)
+        maxValue ?? environmentMax ?? (data.max() ?? 1.0)
     }
 
     public var body: some View {

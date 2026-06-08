@@ -16,6 +16,15 @@ public struct NetworkData: Codable, Sendable {
 
     public enum InterfaceType: String, Codable, Sendable {
         case wifi, ethernet, cellular, other
+
+        public var displayName: String {
+            switch self {
+            case .wifi: return "Wi-Fi"
+            case .ethernet: return "Ethernet"
+            case .cellular: return "Cellular"
+            case .other: return "Other"
+            }
+        }
     }
 
     public init(

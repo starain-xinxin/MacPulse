@@ -86,14 +86,3 @@ struct NetworkCardView: View {
         }
     }
 }
-
-extension NetworkData.InterfaceType {
-    var displayName: String {
-        switch self {
-        case .wifi: return "Wi-Fi"
-        case .ethernet: return "Ethernet"
-        case .cellular: return "Cellular"
-        case .other: return "Other"
-        }
-    }
-}

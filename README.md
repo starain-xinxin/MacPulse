@@ -21,7 +21,7 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 |-----------|-------------|
 | **Dashboard Window** | Main window with a grid of metric cards, gauges, and sparklines |
 | **Menu Bar** | MenuBarExtra showing key metrics at a glance |
-| **Desktop Widgets** | 5 WidgetKit widgets (CPU, Memory, Battery, Network, System Overview) in small/medium/large sizes, with sparkline charts and second-level refresh while the app runs |
+| **Desktop Widgets** | 6 WidgetKit widgets (CPU, Memory, Battery, Network, System Overview, CPU·RAM·Disk) with sparkline charts and second-level refresh while the app runs |
 | **Settings** | Polling interval (default 1s, applied live), temperature unit, launch at login |
 
 ## Screenshots

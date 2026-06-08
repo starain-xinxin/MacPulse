@@ -11,6 +11,6 @@ struct NetworkWidget: Widget {
         }
         .configurationDisplayName("Network")
         .description("Monitor network status")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
 }

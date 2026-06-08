@@ -9,14 +9,14 @@ struct NetworkWidgetView: View {
 
     var body: some View {
         switch family {
-        case .systemSmall:
-            smallView
-        case .systemMedium:
-            mediumView
+        case .systemLarge:
+            largeView
         default:
-            smallView
+            mediumView
         }
     }
+
+    // MARK: Shared pieces
 
     private var header: some View {
         HStack(spacing: 5) {
@@ -26,90 +26,126 @@ struct NetworkWidgetView: View {
                 .font(.caption)
                 .fontWeight(.semibold)
             Spacer()
-        }
-    }
-
-    private var speeds: some View {
-        VStack(spacing: 6) {
-            speedRow("arrow.down.circle.fill", .blue, entry.networkData.downloadBytesPerSecond)
-            speedRow("arrow.up.circle.fill", .green, entry.networkData.uploadBytesPerSecond)
-        }
-    }
-
-    private var chart: some View {
-        ZStack {
-            MiniSparkline(values: entry.downloadHistory, color: .blue, height: 26)
-            MiniSparkline(values: entry.uploadHistory, color: .green.opacity(0.8), height: 26)
-        }
-    }
-
-    private var smallView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            header
-            speeds
-            if entry.downloadHistory.count > 1 || entry.uploadHistory.count > 1 {
-                chart
-            } else {
-                Spacer()
-            }
-            Text(entry.networkData.isConnected ? entry.networkData.interfaceType.rawValue.capitalized : "Offline")
+            Text(entry.networkData.isConnected ? entry.networkData.interfaceType.displayName : "Offline")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
     }
 
-    private var mediumView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            header
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    speeds
-                    if entry.downloadHistory.count > 1 || entry.uploadHistory.count > 1 {
-                        chart
-                    }
-                }
-                .frame(maxWidth: .infinity)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    if let ssid = entry.networkData.ssid, !ssid.isEmpty {
-                        metricRow("Wi-Fi", ssid)
-                    }
-                    if let ip = entry.networkData.localIPv4 {
-                        metricRow("Local", ip)
-                    }
-                    if let ip = entry.networkData.publicIP {
-                        metricRow("Public", ip)
-                    }
-                    if let loc = entry.networkData.ipLocation {
-                        metricRow("Location", loc)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
+    private func speedBadge(_ icon: String, _ color: Color, _ label: String, _ bytes: UInt64) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+                .font(.callout)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(label)
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+                Text(formatSpeed(bytes))
+                    .font(.system(size: 13, weight: .semibold))
+                    .monospacedDigit()
             }
         }
     }
 
-    private func speedRow(_ icon: String, _ color: Color, _ bytes: UInt64) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundStyle(color)
-                .font(.caption2)
-            Spacer()
-            Text(formatSpeed(bytes))
-                .font(.caption)
-                .fontWeight(.medium)
-                .monospacedDigit()
+    /// Both series on one shared-scale axis so up/down are directly comparable.
+    private func chart(height: CGFloat) -> some View {
+        let sharedMax = Double(max(
+            entry.downloadHistory.max() ?? 0,
+            entry.uploadHistory.max() ?? 0,
+            1
+        ))
+        return ZStack {
+            MiniSparkline(values: entry.downloadHistory, color: .blue, height: height)
+                .environment(\.sparklineMax, sharedMax)
+            MiniSparkline(values: entry.uploadHistory, color: .green.opacity(0.85), height: height)
+                .environment(\.sparklineMax, sharedMax)
         }
     }
 
-    private func metricRow(_ label: String, _ value: String) -> some View {
-        HStack {
-            Text(label).font(.caption2).foregroundStyle(.secondary)
-            Spacer()
+    private var hasHistory: Bool {
+        entry.downloadHistory.count > 1 || entry.uploadHistory.count > 1
+    }
+
+    // MARK: Medium
+
+    private var mediumView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            header
+            HStack(spacing: 18) {
+                speedBadge("arrow.down.circle.fill", .blue, "Download", entry.networkData.downloadBytesPerSecond)
+                speedBadge("arrow.up.circle.fill", .green, "Upload", entry.networkData.uploadBytesPerSecond)
+                Spacer()
+            }
+            if hasHistory { chart(height: 30) }
+            detailGrid(columns: 2)
+        }
+    }
+
+    // MARK: Large
+
+    private var largeView: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            header
+            HStack(spacing: 24) {
+                speedBadge("arrow.down.circle.fill", .blue, "Download", entry.networkData.downloadBytesPerSecond)
+                speedBadge("arrow.up.circle.fill", .green, "Upload", entry.networkData.uploadBytesPerSecond)
+                Spacer()
+            }
+            if hasHistory { chart(height: 70) }
+            Divider()
+            VStack(alignment: .leading, spacing: 7) {
+                detailRow("wifi", "Wi-Fi", entry.networkData.ssid ?? "—")
+                detailRow("pc", "Local", entry.networkData.localIPv4 ?? "—")
+                detailRow("globe", "Public", entry.networkData.publicIP ?? "—")
+                detailRow("location.fill", "Location", entry.networkData.ipLocation ?? "—")
+                detailRow("cable.connector", "Interface", interfaceDescription)
+            }
+        }
+    }
+
+    // MARK: Detail rows
+
+    private var interfaceDescription: String {
+        let name = entry.networkData.activeInterfaceName
+        let type = entry.networkData.interfaceType.displayName
+        return name.isEmpty ? type : "\(type) (\(name))"
+    }
+
+    private func detailGrid(columns: Int) -> some View {
+        let items: [(String, String, String)] = [
+            ("wifi", "Wi-Fi", entry.networkData.ssid ?? "—"),
+            ("pc", "Local", entry.networkData.localIPv4 ?? "—"),
+            ("globe", "Public", entry.networkData.publicIP ?? "—"),
+            ("location.fill", "Location", entry.networkData.ipLocation ?? "—"),
+            ("cable.connector", "Interface", interfaceDescription)
+        ]
+        return LazyVGrid(
+            columns: Array(repeating: GridItem(.flexible(), alignment: .leading), count: columns),
+            alignment: .leading,
+            spacing: 3
+        ) {
+            ForEach(items, id: \.1) { item in
+                detailRow(item.0, item.1, item.2)
+            }
+        }
+    }
+
+    private func detailRow(_ icon: String, _ label: String, _ value: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.system(size: 9))
+                .foregroundStyle(.cyan)
+                .frame(width: 13)
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 4)
             Text(value)
                 .font(.system(size: 10, design: .monospaced))
                 .fontWeight(.medium)
                 .lineLimit(1)
+                .truncationMode(.middle)
         }
     }
 
