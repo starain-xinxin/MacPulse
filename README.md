@@ -9,7 +9,7 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 - **CPU Monitoring** — Overall and per-core usage with real-time sparkline charts
 - **Memory Monitoring** — Used/free/active/wired/compressed breakdown, memory pressure, swap usage
 - **Disk Monitoring** — Capacity and usage for all mounted local volumes
-- **Network Monitoring** — Upload/download speed, total traffic, interface type, local IP
+- **Network Monitoring** — Upload/download speed, total traffic, interface type, local IP, Wi-Fi SSID, public IP with geolocation
 - **Battery Monitoring** — Charge level, health percentage, cycle count, temperature, time remaining
 - **GPU Monitoring** — Active usage via IOReport API (Apple Silicon integrated GPU)
 - **Thermal Monitoring** — CPU temperature, system thermal pressure level
@@ -45,7 +45,7 @@ open MacPulse.xcodeproj
 Select the **MacPulse** scheme, then `Cmd+R` to build and run.
 
 The project has zero third-party dependencies — it uses only Apple frameworks:
-- SwiftUI, WidgetKit, IOKit, Network, ServiceManagement, CoreLocation
+- SwiftUI, WidgetKit, IOKit, Network, ServiceManagement, CoreLocation, CoreWLAN
 
 ## Architecture
 
@@ -83,15 +83,15 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 
 - [ ] Desktop widgets cannot be added (widget target configuration needs debugging in Xcode)
 - [x] ~~Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable~~ (Fixed: masonry layout + drag-and-drop)
-- [ ] Public IP / geolocation not displaying (IP-API fetch needs error handling and HTTPS migration)
-- [ ] Only local IP is shown; Wi-Fi SSID name is not retrieved
+- [x] ~~Public IP / geolocation not displaying~~ (Fixed: migrated to HTTPS endpoint with `success`/error handling — cleartext HTTP was blocked by App Transport Security)
+- [x] ~~Only local IP is shown; Wi-Fi SSID name is not retrieved~~ (Fixed: SSID via CoreWLAN, gated by CoreLocation authorization required on macOS Sonoma+)
 - [ ] GPU usage always reads 0% (IOReport subscription/sampling logic needs debugging on specific M-series chips)
 - [ ] CPU temperature may not display (IOKit sensor paths vary across M1/M2/M3/M4 models)
 
 ### Planned Features
 
 - [ ] **Top processes** — Show top CPU/memory consuming processes per metric card (via `sysctl` / `proc_pidinfo`)
-- [ ] **Network details** — Wi-Fi SSID display, public IP with geolocation, optional CoreLocation integration
+- [x] ~~**Network details**~~ — Wi-Fi SSID display (CoreWLAN), public IP with geolocation (HTTPS), CoreLocation authorization to unlock SSID
 - [x] ~~**Draggable dashboard**~~ — Cards are now drag-and-drop reorderable with persisted order
 - [x] ~~**Responsive layout**~~ — Custom masonry layout adapts to window width
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views

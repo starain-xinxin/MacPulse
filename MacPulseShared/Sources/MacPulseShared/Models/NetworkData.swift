@@ -3,6 +3,7 @@ import Foundation
 public struct NetworkData: Codable, Sendable {
     public var activeInterfaceName: String
     public var interfaceType: InterfaceType
+    public var ssid: String?
     public var localIPv4: String?
     public var localIPv6: String?
     public var publicIP: String?
@@ -20,6 +21,7 @@ public struct NetworkData: Codable, Sendable {
     public init(
         activeInterfaceName: String = "",
         interfaceType: InterfaceType = .other,
+        ssid: String? = nil,
         localIPv4: String? = nil,
         localIPv6: String? = nil,
         publicIP: String? = nil,
@@ -32,6 +34,7 @@ public struct NetworkData: Codable, Sendable {
     ) {
         self.activeInterfaceName = activeInterfaceName
         self.interfaceType = interfaceType
+        self.ssid = ssid
         self.localIPv4 = localIPv4
         self.localIPv6 = localIPv6
         self.publicIP = publicIP

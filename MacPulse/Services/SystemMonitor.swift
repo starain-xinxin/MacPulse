@@ -17,6 +17,7 @@ final class SystemMonitor {
     private let thermalMonitor = ThermalMonitor()
     private let systemInfoProvider = SystemInfoProvider()
     private let sharedDataManager = SharedDataManager()
+    let locationManager = LocationManager()
 
     private var timer: Timer?
     private var pollCount = 0
@@ -30,6 +31,9 @@ final class SystemMonitor {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+
+        // Request location access; it gates Wi-Fi SSID lookup on macOS Sonoma+.
+        locationManager.requestAuthorization()
 
         // Initial fetch
         Task { await poll() }
@@ -57,6 +61,10 @@ final class SystemMonitor {
     }
 
     private func poll() async {
+        // Propagate current location authorization so the network monitor knows
+        // whether it is allowed to read the Wi-Fi SSID this cycle.
+        networkMonitor.locationAuthorized = locationManager.isAuthorized
+
         let result = await Task.detached { [cpuMonitor, memoryMonitor, diskMonitor, networkMonitor, batteryMonitor, gpuMonitor, thermalMonitor, systemInfoProvider] in
             let cpu = cpuMonitor.fetch()
             let memory = memoryMonitor.fetch()

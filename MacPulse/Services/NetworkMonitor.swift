@@ -1,15 +1,20 @@
 import Foundation
 import Network
 import MacPulseShared
-import CoreLocation
+import CoreWLAN
 
 final class NetworkMonitorService: @unchecked Sendable {
     private let pathMonitor = NWPathMonitor()
     private let monitorQueue = DispatchQueue(label: "com.macpulse.network")
+    private let wifiClient = CWWiFiClient.shared()
 
     private var currentInterfaceName: String = ""
     private var currentInterfaceType: NetworkData.InterfaceType = .other
     private var isConnected = false
+
+    /// Set by the app once CoreLocation authorization is granted. On macOS
+    /// Sonoma+ the SSID is only readable while the app holds location access.
+    var locationAuthorized = false
 
     private var previousBytesIn: UInt64 = 0
     private var previousBytesOut: UInt64 = 0
@@ -81,6 +86,7 @@ extension NetworkMonitorService: MonitorService {
         return NetworkData(
             activeInterfaceName: currentInterfaceName,
             interfaceType: currentInterfaceType,
+            ssid: fetchSSID(),
             localIPv4: localIPs.ipv4,
             localIPv6: localIPs.ipv6,
             publicIP: cachedPublicIP,
@@ -164,6 +170,16 @@ extension NetworkMonitorService: MonitorService {
         return (ipv4, ipv6)
     }
 
+    /// Returns the current Wi-Fi SSID, or nil when not on Wi-Fi or when the
+    /// system withholds it. On macOS Sonoma+ the SSID is only populated while
+    /// the app holds CoreLocation authorization, so we skip the lookup
+    /// entirely when unauthorized to avoid a misleading nil.
+    private func fetchSSID() -> String? {
+        guard currentInterfaceType == .wifi, locationAuthorized else { return nil }
+        guard let interface = wifiClient.interface() else { return nil }
+        return interface.ssid()
+    }
+
     private func shouldRefreshPublicIP() -> Bool {
         guard let last = lastPublicIPFetch else { return true }
         return Date().timeIntervalSince(last) > AppConstants.publicIPRefreshInterval
@@ -172,19 +188,23 @@ extension NetworkMonitorService: MonitorService {
     private func fetchPublicIPAndLocation() {
         lastPublicIPFetch = Date()
 
-        // Fetch public IP and location from ip-api.com (no key needed)
-        guard let url = URL(string: "http://ip-api.com/json/?fields=query,city,regionName,country") else { return }
+        // Use an HTTPS endpoint: the app is sandboxed and App Transport
+        // Security blocks cleartext HTTP, which previously caused this request
+        // to fail silently. ipwho.is requires no API key and returns geo data.
+        guard let url = URL(string: "https://ipwho.is/?fields=ip,city,region,country,success") else { return }
 
         let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
             guard let self, let data, error == nil else { return }
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                self.cachedPublicIP = json["query"] as? String
-                let city = json["city"] as? String ?? ""
-                let region = json["regionName"] as? String ?? ""
-                let country = json["country"] as? String ?? ""
-                let parts = [city, region, country].filter { !$0.isEmpty }
-                self.cachedIPLocation = parts.joined(separator: ", ")
-            }
+            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
+            // ipwho.is signals failures via "success": false rather than HTTP status.
+            if let success = json["success"] as? Bool, success == false { return }
+
+            self.cachedPublicIP = json["ip"] as? String
+            let city = json["city"] as? String ?? ""
+            let region = json["region"] as? String ?? ""
+            let country = json["country"] as? String ?? ""
+            let parts = [city, region, country].filter { !$0.isEmpty }
+            self.cachedIPLocation = parts.isEmpty ? nil : parts.joined(separator: ", ")
         }
         task.resume()
     }
