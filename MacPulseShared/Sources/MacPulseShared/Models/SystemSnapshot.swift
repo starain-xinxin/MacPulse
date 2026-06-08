@@ -10,6 +10,7 @@ public struct SystemSnapshot: Codable, Sendable {
     public var gpu: GPUData
     public var thermal: ThermalData
     public var systemInfo: SystemInfoData
+    public var history: MetricHistory
 
     public init(
         timestamp: Date = Date(),
@@ -20,7 +21,8 @@ public struct SystemSnapshot: Codable, Sendable {
         battery: BatteryData? = nil,
         gpu: GPUData = .empty,
         thermal: ThermalData = .empty,
-        systemInfo: SystemInfoData = .empty
+        systemInfo: SystemInfoData = .empty,
+        history: MetricHistory = .empty
     ) {
         self.timestamp = timestamp
         self.cpu = cpu
@@ -31,6 +33,7 @@ public struct SystemSnapshot: Codable, Sendable {
         self.gpu = gpu
         self.thermal = thermal
         self.systemInfo = systemInfo
+        self.history = history
     }
 
     public static let empty = SystemSnapshot()

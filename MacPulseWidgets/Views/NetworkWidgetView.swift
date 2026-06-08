@@ -18,42 +18,40 @@ struct NetworkWidgetView: View {
         }
     }
 
+    private var header: some View {
+        HStack(spacing: 5) {
+            Image(systemName: entry.networkData.isConnected ? "network" : "wifi.slash")
+                .foregroundStyle(.cyan)
+            Text("Network")
+                .font(.caption)
+                .fontWeight(.semibold)
+            Spacer()
+        }
+    }
+
+    private var speeds: some View {
+        VStack(spacing: 6) {
+            speedRow("arrow.down.circle.fill", .blue, entry.networkData.downloadBytesPerSecond)
+            speedRow("arrow.up.circle.fill", .green, entry.networkData.uploadBytesPerSecond)
+        }
+    }
+
+    private var chart: some View {
+        ZStack {
+            MiniSparkline(values: entry.downloadHistory, color: .blue, height: 26)
+            MiniSparkline(values: entry.uploadHistory, color: .green.opacity(0.8), height: 26)
+        }
+    }
+
     private var smallView: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "network")
-                    .foregroundStyle(.cyan)
-                Text("Network")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+        VStack(alignment: .leading, spacing: 8) {
+            header
+            speeds
+            if entry.downloadHistory.count > 1 || entry.uploadHistory.count > 1 {
+                chart
+            } else {
                 Spacer()
             }
-
-            VStack(spacing: 6) {
-                HStack {
-                    Image(systemName: "arrow.down.circle.fill")
-                        .foregroundStyle(.blue)
-                        .font(.caption2)
-                    Spacer()
-                    Text(formatSpeed(entry.networkData.downloadBytesPerSecond))
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .monospacedDigit()
-                }
-                HStack {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.caption2)
-                    Spacer()
-                    Text(formatSpeed(entry.networkData.uploadBytesPerSecond))
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .monospacedDigit()
-                }
-            }
-
-            Spacer()
-
             Text(entry.networkData.isConnected ? entry.networkData.interfaceType.rawValue.capitalized : "Offline")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -61,25 +59,46 @@ struct NetworkWidgetView: View {
     }
 
     private var mediumView: some View {
-        HStack(spacing: 16) {
-            smallView
+        VStack(alignment: .leading, spacing: 8) {
+            header
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    speeds
+                    if entry.downloadHistory.count > 1 || entry.uploadHistory.count > 1 {
+                        chart
+                    }
+                }
+                .frame(maxWidth: .infinity)
 
-            VStack(alignment: .leading, spacing: 4) {
-                if let ssid = entry.networkData.ssid, !ssid.isEmpty {
-                    metricRow("Wi-Fi", ssid)
+                VStack(alignment: .leading, spacing: 4) {
+                    if let ssid = entry.networkData.ssid, !ssid.isEmpty {
+                        metricRow("Wi-Fi", ssid)
+                    }
+                    if let ip = entry.networkData.localIPv4 {
+                        metricRow("Local", ip)
+                    }
+                    if let ip = entry.networkData.publicIP {
+                        metricRow("Public", ip)
+                    }
+                    if let loc = entry.networkData.ipLocation {
+                        metricRow("Location", loc)
+                    }
                 }
-                if let ip = entry.networkData.localIPv4 {
-                    metricRow("Local", ip)
-                }
-                if let ip = entry.networkData.publicIP {
-                    metricRow("Public", ip)
-                }
-                if let loc = entry.networkData.ipLocation {
-                    metricRow("Location", loc)
-                }
-                metricRow("Interface", entry.networkData.activeInterfaceName)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private func speedRow(_ icon: String, _ color: Color, _ bytes: UInt64) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+                .font(.caption2)
+            Spacer()
+            Text(formatSpeed(bytes))
+                .font(.caption)
+                .fontWeight(.medium)
+                .monospacedDigit()
         }
     }
 

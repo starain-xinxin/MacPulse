@@ -57,6 +57,10 @@ struct MemoryWidgetView: View {
             Text(entry.memoryData.pressure.rawValue.capitalized)
                 .font(.caption2)
                 .foregroundStyle(pressureColor)
+
+            if entry.history.count > 1 {
+                MiniSparkline(data: entry.history, color: .green, height: 18, maxValue: 1.0)
+            }
         }
     }
 

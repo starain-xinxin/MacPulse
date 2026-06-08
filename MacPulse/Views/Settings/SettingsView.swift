@@ -2,6 +2,8 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
+    @Bindable var viewModel: DashboardViewModel
+
     @AppStorage("pollingInterval") private var pollingInterval: Double = AppConstants.defaultPollingInterval
     @AppStorage("temperatureUnit") private var temperatureUnit: String = TemperatureUnit.celsius.rawValue
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = false
@@ -13,6 +15,9 @@ struct SettingsView: View {
                     ForEach(PollingInterval.allCases, id: \.rawValue) { interval in
                         Text(interval.label).tag(interval.rawValue)
                     }
+                }
+                .onChange(of: pollingInterval) { _, newValue in
+                    viewModel.monitor.updatePollingInterval(newValue)
                 }
 
                 Picker("Temperature Unit", selection: $temperatureUnit) {

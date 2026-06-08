@@ -97,6 +97,10 @@ struct SystemOverviewWidgetView: View {
                 }
             }
 
+            if entry.snapshot.history.cpu.count > 1 {
+                MiniSparkline(data: entry.snapshot.history.cpu, color: .blue, height: 22, maxValue: 1.0)
+            }
+
             Divider()
 
             VStack(spacing: 6) {

@@ -4,6 +4,7 @@ import MacPulseShared
 struct MemoryWidgetEntry: TimelineEntry {
     let date: Date
     let memoryData: MemoryData
+    let history: [Double]
 
     static let placeholder = MemoryWidgetEntry(
         date: Date(),
@@ -15,7 +16,8 @@ struct MemoryWidgetEntry: TimelineEntry {
             wiredBytes: 3_000_000_000,
             compressedBytes: 2_000_000_000,
             pressure: .nominal
-        )
+        ),
+        history: [0.55, 0.58, 0.6, 0.62, 0.59, 0.63, 0.61, 0.64, 0.62, 0.63]
     )
 }
 
@@ -31,14 +33,12 @@ struct MemoryWidgetProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<MemoryWidgetEntry>) -> Void) {
-        let entry = makeEntry()
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
-        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
+        completion(Timeline(entries: [makeEntry()], policy: .atEnd))
     }
 
     private func makeEntry() -> MemoryWidgetEntry {
         if let snapshot = sharedData.readSnapshot() {
-            return MemoryWidgetEntry(date: snapshot.timestamp, memoryData: snapshot.memory)
+            return MemoryWidgetEntry(date: snapshot.timestamp, memoryData: snapshot.memory, history: snapshot.history.memory)
         }
         return .placeholder
     }
