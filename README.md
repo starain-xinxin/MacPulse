@@ -105,20 +105,6 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
 
 
-## Updates
-
-MacPulse checks for new versions on launch (and on demand from **Settings → About → Check for Updates**) by querying the GitHub Releases API. When a newer version is published, a green badge appears in the menu bar and a **Download Update** button shows in Settings. The app does not auto-install — clicking the button opens the release page so you download the DMG and replace the app manually. This keeps the app free of third-party dependencies and avoids code-signing complications.
-
-### Publishing a release (maintainers)
-
-1. Bump `MARKETING_VERSION` in the Xcode project (e.g. `1.0.1` → `1.0.2`)
-2. Archive and export a signed, notarized `.dmg`
-3. Create a GitHub release with a tag matching the version (`v1.0.2` or `1.0.2` — both are accepted), and attach the DMG
-4. Existing installs detect the new tag via the Releases API and prompt users to update
-
-Version comparison is semantic (`major.minor.patch`); a leading `v` is stripped automatically.
-
-
 ## License
 
 MIT
