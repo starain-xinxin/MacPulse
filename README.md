@@ -87,27 +87,13 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 
 ### Known Issues
 
-- [x] ~~Desktop widgets cannot be added~~ (Fixed: the widget extension's `Info.plist` was missing the `NSExtension` / `NSExtensionPointIdentifier = com.apple.widgetkit-extension` key, so macOS never registered it as a WidgetKit provider)
-- [x] ~~Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable~~ (Fixed: masonry layout + drag-and-drop)
-- [x] ~~Public IP / geolocation not displaying~~ (Fixed: migrated to HTTPS endpoint with `success`/error handling — cleartext HTTP was blocked by App Transport Security)
-- [x] ~~Only local IP is shown; Wi-Fi SSID name is not retrieved~~ (Fixed: SSID via CoreWLAN, gated by CoreLocation authorization required on macOS Sonoma+)
-- [x] ~~GPU usage always reads 0%~~ (Fixed: read IOAccelerator utilization with corrected IOReport performance-state sampling as fallback)
-- [ ] CPU temperature may not display (IOKit sensor paths vary across M1/M2/M3/M4 models)
 
 ### Planned Features
 
-- [x] ~~**Top processes**~~ — Show top CPU/memory consumers in the metric cards and a dedicated split-view WidgetKit widget (via `proc_listallpids` / `proc_pidinfo`)
-- [x] ~~**Network details**~~ — Wi-Fi SSID display (CoreWLAN), public IP with geolocation (HTTPS), CoreLocation authorization to unlock SSID
-- [x] ~~**Draggable dashboard**~~ — Cards are now drag-and-drop reorderable with persisted order
-- [x] ~~**Responsive layout**~~ — Custom masonry layout adapts to window width
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
-- [x] ~~**GPU monitoring fix**~~ — Use IOAccelerator utilization across Apple Silicon generations and corrected IOReport GPU performance-state sampling as fallback
-- [ ] **Temperature sensors** — Map correct IOKit/IOHIDSensor paths for each Apple Silicon chip variant
-- [x] ~~**Widget refresh**~~ — Widgets read App Group data and use the same refresh interval as the corresponding dashboard module while the app runs. After a full quit, the OS background rate applies.
-- [x] ~~**Adjustable refresh rate**~~ — CPU, memory, disk, network, battery, GPU, and process monitoring each have an independent **1-10s** refresh interval.
 - [ ] **Notification alerts** — Optional alerts when CPU/memory/disk exceeds thresholds
 - [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
-- [x] ~~**Localization**~~ — Chinese (Simplified) and English UI with an in-app language selector shared by the app and widgets
+
 
 ## License
 
