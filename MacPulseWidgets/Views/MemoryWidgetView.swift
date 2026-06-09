@@ -54,7 +54,7 @@ struct MemoryWidgetView: View {
             }
             .frame(width: 70, height: 70)
 
-            Text(entry.memoryData.pressure.rawValue.capitalized)
+            Text(pressureText)
                 .font(.caption2)
                 .foregroundStyle(pressureColor)
 
@@ -81,7 +81,7 @@ struct MemoryWidgetView: View {
         }
     }
 
-    private func metricRow(_ label: String, _ value: String) -> some View {
+    private func metricRow(_ label: LocalizedStringKey, _ value: String) -> some View {
         HStack {
             Text(label)
                 .font(.caption2)
@@ -99,6 +99,14 @@ struct MemoryWidgetView: View {
         case .critical: return .red
         case .warning: return .orange
         case .nominal: return .green
+        }
+    }
+
+    private var pressureText: LocalizedStringKey {
+        switch entry.memoryData.pressure {
+        case .nominal: return "Nominal"
+        case .warning: return "Warning"
+        case .critical: return "Critical"
         }
     }
 

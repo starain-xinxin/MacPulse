@@ -6,6 +6,7 @@ struct NetworkWidgetView: View {
     let entry: NetworkWidgetEntry
 
     @Environment(\.widgetFamily) var family
+    @Environment(\.locale) private var locale
 
     var body: some View {
         switch family {
@@ -26,13 +27,25 @@ struct NetworkWidgetView: View {
                 .font(.caption)
                 .fontWeight(.semibold)
             Spacer()
-            Text(entry.networkData.isConnected ? entry.networkData.interfaceType.displayName : "Offline")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Group {
+                if entry.networkData.isConnected {
+                    Text(interfaceNameKey)
+                } else {
+                    Text("Offline")
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
         }
     }
 
-    private func metricBadge(_ icon: String, _ color: Color, _ label: String, _ value: String, monospaced: Bool = true) -> some View {
+    private func metricBadge(
+        _ icon: String,
+        _ color: Color,
+        _ label: LocalizedStringKey,
+        _ value: String,
+        monospaced: Bool = true
+    ) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .foregroundStyle(color)
@@ -64,7 +77,12 @@ struct NetworkWidgetView: View {
         }
     }
 
-    private func speedBadge(_ icon: String, _ color: Color, _ label: String, _ bytes: UInt64) -> some View {
+    private func speedBadge(
+        _ icon: String,
+        _ color: Color,
+        _ label: LocalizedStringKey,
+        _ bytes: UInt64
+    ) -> some View {
         metricBadge(icon, color, label, formatSpeed(bytes))
     }
 
@@ -73,7 +91,11 @@ struct NetworkWidgetView: View {
             "wifi",
             .cyan,
             "Wi-Fi",
-            entry.networkData.ssid ?? (entry.networkData.isConnected ? "—" : "Offline"),
+            entry.networkData.ssid ?? (
+                entry.networkData.isConnected
+                    ? "—"
+                    : String(localized: "Offline", locale: locale)
+            ),
             monospaced: false
         )
     }
@@ -128,12 +150,12 @@ struct NetworkWidgetView: View {
 
     private var interfaceDescription: String {
         let name = entry.networkData.activeInterfaceName
-        let type = entry.networkData.interfaceType.displayName
+        let type = localizedInterfaceName
         return name.isEmpty ? type : "\(type) (\(name))"
     }
 
     private func detailGrid(columns: Int) -> some View {
-        let items: [(String, String, String)] = [
+        let items: [(String, LocalizedStringKey, String)] = [
             ("pc", "Local", entry.networkData.localIPv4 ?? "—"),
             ("globe", "Public", entry.networkData.publicIP ?? "—"),
             ("location.fill", "Location", entry.networkData.ipLocation ?? "—"),
@@ -144,13 +166,17 @@ struct NetworkWidgetView: View {
             alignment: .leading,
             spacing: 3
         ) {
-            ForEach(items, id: \.1) { item in
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 detailRow(item.0, item.1, item.2)
             }
         }
     }
 
-    private func detailRow(_ icon: String, _ label: String, _ value: String) -> some View {
+    private func detailRow(
+        _ icon: String,
+        _ label: LocalizedStringKey,
+        _ value: String
+    ) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.system(size: 9))
@@ -170,5 +196,23 @@ struct NetworkWidgetView: View {
 
     private func formatSpeed(_ bytes: UInt64) -> String {
         ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .memory) + "/s"
+    }
+
+    private var interfaceNameKey: LocalizedStringKey {
+        switch entry.networkData.interfaceType {
+        case .wifi: return "Wi-Fi"
+        case .ethernet: return "Ethernet"
+        case .cellular: return "Cellular"
+        case .other: return "Other"
+        }
+    }
+
+    private var localizedInterfaceName: String {
+        switch entry.networkData.interfaceType {
+        case .wifi: return String(localized: "Wi-Fi", locale: locale)
+        case .ethernet: return String(localized: "Ethernet", locale: locale)
+        case .cellular: return String(localized: "Cellular", locale: locale)
+        case .other: return String(localized: "Other", locale: locale)
+        }
     }
 }

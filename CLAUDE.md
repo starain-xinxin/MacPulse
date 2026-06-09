@@ -98,6 +98,11 @@ MacPulse uses the **undocumented but stable IOReport API** from IOKit to access 
 - `MacPulse.app` (bundle ID: `starain.MacPulse`)
 - `MacPulseWidgets` (bundle ID: `starain.MacPulse.MacPulseWidgets`)
 
+The selected UI language is stored in the App Group under `appLanguage`.
+`AppLanguage` supports the system default, English, and Simplified Chinese.
+The app and widget views inject the selected `Locale`, and changing the
+setting reloads WidgetKit timelines.
+
 **Files in App Group container:**
 - `snapshot.json` — Latest `SystemSnapshot` (written by app, read by widgets)
 - `UserDefaults(suiteName:)` keys:

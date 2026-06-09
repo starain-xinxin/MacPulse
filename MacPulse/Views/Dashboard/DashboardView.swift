@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 import MacPulseShared
 
 struct CardContainer<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String
     @ViewBuilder let content: () -> Content
 
@@ -27,6 +27,7 @@ struct CardContainer<Content: View>: View {
 struct DashboardView: View {
     @Bindable var viewModel: DashboardViewModel
     @State private var draggingCard: CardType?
+    @Environment(\.locale) private var locale
 
     var body: some View {
         ScrollView {
@@ -112,7 +113,10 @@ struct DashboardView: View {
                         Label(info.osVersion, systemImage: "apple.logo")
                     }
                     if info.uptime > 0 {
-                        Label("Up \(Formatters.duration(info.uptime))", systemImage: "clock")
+                        Label(
+                            "Up \(Formatters.duration(info.uptime, locale: locale))",
+                            systemImage: "clock"
+                        )
                     }
                 }
                 .font(.caption)

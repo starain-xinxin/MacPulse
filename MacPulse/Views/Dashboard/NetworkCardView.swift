@@ -10,7 +10,7 @@ struct NetworkCardView: View {
         CardContainer(title: "Network", icon: "network") {
             HStack {
                 Label(
-                    data.isConnected ? data.interfaceType.displayName : "Disconnected",
+                    data.isConnected ? interfaceName : LocalizedStringKey("Disconnected"),
                     systemImage: data.isConnected ? interfaceIcon : "wifi.slash"
                 )
                 .font(.caption)
@@ -80,6 +80,15 @@ struct NetworkCardView: View {
         case .ethernet: return "cable.connector"
         case .cellular: return "antenna.radiowaves.left.and.right"
         case .other: return "network"
+        }
+    }
+
+    private var interfaceName: LocalizedStringKey {
+        switch data.interfaceType {
+        case .wifi: return "Wi-Fi"
+        case .ethernet: return "Ethernet"
+        case .cellular: return "Cellular"
+        case .other: return "Other"
         }
     }
 }

@@ -27,7 +27,7 @@ struct GPUCardView: View {
                     }
                     MetricRowView(
                         label: "Thermal",
-                        value: thermal.thermalPressure.rawValue.capitalized,
+                        localizedValue: thermalPressureText,
                         valueColor: thermalColor
                     )
                 }
@@ -48,6 +48,15 @@ struct GPUCardView: View {
         case .serious: return .orange
         case .fair: return .yellow
         case .nominal: return .green
+        }
+    }
+
+    private var thermalPressureText: LocalizedStringKey {
+        switch thermal.thermalPressure {
+        case .nominal: return "Nominal"
+        case .fair: return "Fair"
+        case .serious: return "Serious"
+        case .critical: return "Critical"
         }
     }
 }

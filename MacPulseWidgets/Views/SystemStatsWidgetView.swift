@@ -58,7 +58,12 @@ struct SystemStatsWidgetView: View {
         }
     }
 
-    private func ring(_ label: String, _ value: Double, _ color: Color, icon: String) -> some View {
+    private func ring(
+        _ label: LocalizedStringKey,
+        _ value: Double,
+        _ color: Color,
+        icon: String
+    ) -> some View {
         VStack(spacing: 4) {
             ZStack {
                 Circle()
@@ -85,7 +90,12 @@ struct SystemStatsWidgetView: View {
 
     /// Icon + label stacked tight to the value, so the number sits right next
     /// to its description rather than pushed to the far edge.
-    private func infoCell(_ icon: String, _ label: String, _ value: String, _ tint: Color) -> some View {
+    private func infoCell(
+        _ icon: String,
+        _ label: LocalizedStringKey,
+        _ value: String,
+        _ tint: Color
+    ) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.system(size: 9))
