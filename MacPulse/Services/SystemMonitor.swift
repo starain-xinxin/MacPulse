@@ -21,19 +21,13 @@ final class SystemMonitor {
     let locationManager = LocationManager()
 
     private var timer: Timer?
-    private var pollCount = 0
-    var pollingInterval: TimeInterval
+    private var isPolling = false
+    private var lastSampleAt: [MonitorModule: Date] = [:]
+    var refreshSettings: ModuleRefreshSettings
 
     init() {
-        // Honor the saved polling interval. The shared (App Group) value is the
-        // source of truth so the app and widgets agree; fall back to the local
-        // default if neither is set.
-        if let shared = sharedDataManager.sharedPollingInterval {
-            pollingInterval = shared
-        } else {
-            let saved = UserDefaults.standard.double(forKey: "pollingInterval")
-            pollingInterval = saved > 0 ? saved : AppConstants.defaultPollingInterval
-        }
+        refreshSettings = Self.loadRefreshSettings()
+        try? sharedDataManager.setSharedRefreshSettings(refreshSettings)
     }
 
     var cpuHistory: [Double] = []
@@ -52,7 +46,7 @@ final class SystemMonitor {
         // Initial fetch
         Task { await poll() }
 
-        let timer = Timer(timeInterval: pollingInterval, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: AppConstants.schedulerInterval, repeats: true) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
                 await self.poll()
@@ -68,59 +62,72 @@ final class SystemMonitor {
         isRunning = false
     }
 
-    func updatePollingInterval(_ interval: TimeInterval) {
-        guard interval != pollingInterval else { return }
-        pollingInterval = interval
-        // Persist to the shared store so widgets reflect the same rate.
-        sharedDataManager.setSharedPollingInterval(interval)
-        if isRunning {
-            stop()
-            start()
-        }
-    }
-
-    /// Adopt a polling interval chosen from a widget's configuration (written to
-    /// the App Group) if it differs from the current one.
-    private func reconcileSharedInterval() {
-        guard let shared = sharedDataManager.sharedPollingInterval, shared != pollingInterval else { return }
-        updatePollingInterval(shared)
+    func updateRefreshInterval(_ interval: TimeInterval, for module: MonitorModule) {
+        guard refreshSettings[module] != interval else { return }
+        refreshSettings[module] = interval
+        UserDefaults.standard.set(refreshSettings[module], forKey: Self.preferenceKey(for: module))
+        try? sharedDataManager.setSharedRefreshSettings(refreshSettings)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func poll() async {
-        // Pick up a rate change made from a widget's edit UI.
-        reconcileSharedInterval()
+        guard !isPolling else { return }
+        isPolling = true
+        defer { isPolling = false }
 
         // Propagate current location authorization so the network monitor knows
         // whether it is allowed to read the Wi-Fi SSID this cycle.
         networkMonitor.locationAuthorized = locationManager.isAuthorized
 
-        let result = await Task.detached { [cpuMonitor, memoryMonitor, diskMonitor, networkMonitor, batteryMonitor, gpuMonitor, thermalMonitor, processMonitor, systemInfoProvider] in
-            let cpu = cpuMonitor.fetch()
-            let memory = memoryMonitor.fetch()
-            let disks = diskMonitor.fetch()
-            let network = networkMonitor.fetch()
-            let battery = batteryMonitor.fetch()
-            let gpu = gpuMonitor.fetch()
-            let thermal = thermalMonitor.fetch()
-            let processes = processMonitor.fetch()
-            let systemInfo = systemInfoProvider.fetch()
-
-            return SystemSnapshot(
-                timestamp: Date(),
-                cpu: cpu,
-                memory: memory,
-                disks: disks,
-                network: network,
-                battery: battery,
-                gpu: gpu,
-                thermal: thermal,
-                systemInfo: systemInfo,
-                processes: processes
+        let now = Date()
+        let dueModules = Set(MonitorModule.allCases.filter {
+            Self.isDue(
+                lastRefresh: lastSampleAt[$0],
+                interval: refreshSettings[$0],
+                now: now
             )
+        })
+        guard !dueModules.isEmpty else { return }
+
+        let currentSnapshot = snapshot
+        let result = await Task.detached { [cpuMonitor, memoryMonitor, diskMonitor, networkMonitor, batteryMonitor, gpuMonitor, thermalMonitor, processMonitor, systemInfoProvider] in
+            var updated = currentSnapshot
+            updated.timestamp = now
+
+            if dueModules.contains(.cpu) {
+                updated.cpu = cpuMonitor.fetch()
+            }
+            if dueModules.contains(.memory) {
+                updated.memory = memoryMonitor.fetch()
+            }
+            if dueModules.contains(.disk) {
+                updated.disks = diskMonitor.fetch()
+                updated.systemInfo = systemInfoProvider.fetch()
+            }
+            if dueModules.contains(.network) {
+                updated.network = networkMonitor.fetch()
+            }
+            if dueModules.contains(.battery) {
+                updated.battery = batteryMonitor.fetch()
+            }
+            if dueModules.contains(.gpu) {
+                updated.gpu = gpuMonitor.fetch()
+            }
+            if dueModules.contains(.cpu) || dueModules.contains(.gpu) {
+                updated.thermal = thermalMonitor.fetch()
+            }
+            if dueModules.contains(.processes) {
+                updated.processes = processMonitor.fetch()
+            }
+
+            return updated
         }.value
 
+        for module in dueModules {
+            lastSampleAt[module] = now
+        }
         snapshot = result
-        appendHistory()
+        appendHistory(for: dueModules)
 
         // Attach recent history so widgets can render the same sparklines as
         // the dashboard.
@@ -132,26 +139,28 @@ final class SystemMonitor {
             upload: uploadHistory
         )
 
-        // Write to the App Group and reload widgets on EVERY poll. The app is
-        // the active/foreground process, so these reloads are not charged
-        // against WidgetKit's background budget — this is what lets desktop
-        // widgets update at second-level cadence while MacPulse runs. After a
-        // full quit, the OS background budget (minutes) takes over.
         try? sharedDataManager.writeSnapshot(snapshot)
         WidgetCenter.shared.reloadAllTimelines()
-        pollCount += 1
     }
 
-    private func appendHistory() {
-        cpuHistory.append(snapshot.cpu.overallUsage)
-        memoryHistory.append(
-            snapshot.memory.totalBytes > 0
-                ? Double(snapshot.memory.usedBytes) / Double(snapshot.memory.totalBytes)
-                : 0
-        )
-        gpuHistory.append(snapshot.gpu.activeUsage)
-        downloadHistory.append(snapshot.network.downloadBytesPerSecond)
-        uploadHistory.append(snapshot.network.uploadBytesPerSecond)
+    private func appendHistory(for modules: Set<MonitorModule>) {
+        if modules.contains(.cpu) {
+            cpuHistory.append(snapshot.cpu.overallUsage)
+        }
+        if modules.contains(.memory) {
+            memoryHistory.append(
+                snapshot.memory.totalBytes > 0
+                    ? Double(snapshot.memory.usedBytes) / Double(snapshot.memory.totalBytes)
+                    : 0
+            )
+        }
+        if modules.contains(.gpu) {
+            gpuHistory.append(snapshot.gpu.activeUsage)
+        }
+        if modules.contains(.network) {
+            downloadHistory.append(snapshot.network.downloadBytesPerSecond)
+            uploadHistory.append(snapshot.network.uploadBytesPerSecond)
+        }
 
         let max = AppConstants.sparklineMaxSamples
         if cpuHistory.count > max { cpuHistory.removeFirst(cpuHistory.count - max) }
@@ -159,5 +168,78 @@ final class SystemMonitor {
         if gpuHistory.count > max { gpuHistory.removeFirst(gpuHistory.count - max) }
         if downloadHistory.count > max { downloadHistory.removeFirst(downloadHistory.count - max) }
         if uploadHistory.count > max { uploadHistory.removeFirst(uploadHistory.count - max) }
+    }
+
+    nonisolated static func isDue(
+        lastRefresh: Date?,
+        interval: TimeInterval,
+        now: Date
+    ) -> Bool {
+        guard let lastRefresh else { return true }
+        return now.timeIntervalSince(lastRefresh) >= interval
+    }
+
+    private static func loadRefreshSettings(
+        defaults: UserDefaults = .standard
+    ) -> ModuleRefreshSettings {
+        let fallback = ModuleRefreshSettings.default
+        return ModuleRefreshSettings(
+            cpu: storedInterval(
+                key: ModuleRefreshSettings.cpuPreferenceKey,
+                fallback: fallback.cpu,
+                defaults: defaults
+            ),
+            memory: storedInterval(
+                key: ModuleRefreshSettings.memoryPreferenceKey,
+                fallback: fallback.memory,
+                defaults: defaults
+            ),
+            disk: storedInterval(
+                key: ModuleRefreshSettings.diskPreferenceKey,
+                fallback: fallback.disk,
+                defaults: defaults
+            ),
+            network: storedInterval(
+                key: ModuleRefreshSettings.networkPreferenceKey,
+                fallback: fallback.network,
+                defaults: defaults
+            ),
+            battery: storedInterval(
+                key: ModuleRefreshSettings.batteryPreferenceKey,
+                fallback: fallback.battery,
+                defaults: defaults
+            ),
+            gpu: storedInterval(
+                key: ModuleRefreshSettings.gpuPreferenceKey,
+                fallback: fallback.gpu,
+                defaults: defaults
+            ),
+            processes: storedInterval(
+                key: ModuleRefreshSettings.processesPreferenceKey,
+                fallback: fallback.processes,
+                defaults: defaults
+            )
+        )
+    }
+
+    private static func storedInterval(
+        key: String,
+        fallback: TimeInterval,
+        defaults: UserDefaults
+    ) -> TimeInterval {
+        guard defaults.object(forKey: key) != nil else { return fallback }
+        return defaults.double(forKey: key)
+    }
+
+    private static func preferenceKey(for module: MonitorModule) -> String {
+        switch module {
+        case .cpu: ModuleRefreshSettings.cpuPreferenceKey
+        case .memory: ModuleRefreshSettings.memoryPreferenceKey
+        case .disk: ModuleRefreshSettings.diskPreferenceKey
+        case .network: ModuleRefreshSettings.networkPreferenceKey
+        case .battery: ModuleRefreshSettings.batteryPreferenceKey
+        case .gpu: ModuleRefreshSettings.gpuPreferenceKey
+        case .processes: ModuleRefreshSettings.processesPreferenceKey
+        }
     }
 }

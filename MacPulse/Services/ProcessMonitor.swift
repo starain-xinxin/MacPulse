@@ -20,6 +20,7 @@ final class ProcessMonitor: MonitorService, @unchecked Sendable {
 
     nonisolated func fetch() -> ProcessData {
         let timestamp = DispatchTime.now().uptimeNanoseconds
+
         let samples = collectSamples()
         let elapsed = previousTimestamp.map { Double(timestamp - $0) / 1_000_000_000 }
         let logicalCoreCount = Double(ProcessInfo.processInfo.activeProcessorCount)
@@ -47,8 +48,9 @@ final class ProcessMonitor: MonitorService, @unchecked Sendable {
             uniqueKeysWithValues: samples.map { ($0.processID, $0.totalCPUTime) }
         )
         previousTimestamp = timestamp
+        let ranked = Self.ranked(metrics, limit: resultLimit)
 
-        return Self.ranked(metrics, limit: resultLimit)
+        return ranked
     }
 
     nonisolated static func ranked(_ metrics: [ProcessMetric], limit: Int) -> ProcessData {

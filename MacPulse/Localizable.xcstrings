@@ -74,6 +74,9 @@
         }
       }
     },
+    "%llds" : {
+
+    },
     "About" : {
       "localizations" : {
         "zh-Hans" : {
@@ -417,16 +420,6 @@
         }
       }
     },
-    "Polling Interval" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刷新间隔"
-          }
-        }
-      }
-    },
     "Pressure" : {
       "localizations" : {
         "zh-Hans" : {
@@ -459,6 +452,16 @@
     },
     "RAM" : {
 
+    },
+    "Refresh Rates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新频率"
+          }
+        }
+      }
     },
     "Serious" : {
       "localizations" : {
@@ -590,6 +593,9 @@
         }
       }
     },
+    "Top Processes" : {
+
+    },
     "Total: %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -676,6 +682,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wi-Fi"
+          }
+        }
+      }
+    },
+    "Widgets use the same refresh interval as the dashboard." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小组件使用与仪表板相同的刷新间隔。"
           }
         }
       }

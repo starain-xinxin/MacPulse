@@ -43,7 +43,7 @@ xcodebuild test -scheme MacPulse -destination 'platform=macOS'
 ### Data Flow
 
 ```
-Monitor Services (poll system APIs every 1s)
+ Monitor Services (independent 1-10s refresh intervals)
     ↓
 SystemMonitor (orchestrates all monitors, assembles SystemSnapshot)
     ↓
@@ -51,7 +51,10 @@ SystemMonitor (orchestrates all monitors, assembles SystemSnapshot)
 └─→ SharedDataManager → App Group JSON → Widget TimelineProviders
 ```
 
-**Key mechanism:** The app writes a `SystemSnapshot` to the App Group (`group.starain.MacPulse`) on every poll and calls `WidgetCenter.shared.reloadAllTimelines()`. This enables **second-level widget updates** while the app runs (foreground reloads bypass WidgetKit's background budget). After the app quits, widgets fall back to OS background refresh rates.
+**Key mechanism:** The app writes a `SystemSnapshot` to the App Group
+(`group.starain.MacPulse`) after fresh samples arrive. Each widget kind is
+reloaded independently at the corresponding dashboard module interval.
+After the app quits, widgets fall back to OS background refresh rates.
 
 ### Monitor Services
 
@@ -75,7 +78,9 @@ protocol MonitorService {
 - `ProcessMonitor` — `proc_listallpids()` / `proc_pidinfo()` for top CPU and resident-memory consumers
 - `SystemInfoProvider` — `sysctlbyname()` for chip model, OS version, uptime
 
-`SystemMonitor` (`MacPulse/Services/SystemMonitor.swift`) coordinates all services, runs a Timer at the configured polling interval, and writes snapshots to the App Group.
+`SystemMonitor` (`MacPulse/Services/SystemMonitor.swift`) coordinates all
+services with a one-second scheduler. Each service is sampled only when its own
+configured interval is due.
 
 The main app intentionally runs outside App Sandbox because macOS blocks
 `libproc` access to other processes from a sandboxed process. The WidgetKit
@@ -104,16 +109,14 @@ MacPulse uses the **undocumented but stable IOReport API** from IOKit to access 
 - `MacPulse.app` (bundle ID: `starain.MacPulse`)
 - `MacPulseWidgets` (bundle ID: `starain.MacPulse.MacPulseWidgets`)
 
-The selected UI language is stored in the App Group under `appLanguage`.
+The selected UI language is stored in the App Group's `preferences.json`.
 `AppLanguage` supports the system default, English, and Simplified Chinese.
 The app and widget views inject the selected `Locale`, and changing the
 setting reloads WidgetKit timelines.
 
 **Files in App Group container:**
 - `snapshot.json` — Latest `SystemSnapshot` (written by app, read by widgets)
-- `UserDefaults(suiteName:)` keys:
-  - `lastUpdate` — Timestamp of last snapshot write
-  - `pollingInterval` — Shared polling rate (seconds); app and widgets sync from this
+- `preferences.json` — Shared language and per-module refresh intervals
 
 **SharedDataManager** (`MacPulseShared/Sources/MacPulseShared/SharedDataManager.swift`) handles read/write. It's instantiated in both the app's `SystemMonitor` and each widget's `TimelineProvider`.
 
@@ -127,7 +130,9 @@ setting reloads WidgetKit timelines.
 - `Widgets/<Name>Widget.swift` — Widget configuration with `.supportedFamilies`
 - `Views/<Name>WidgetView.swift` — SwiftUI views for each size family
 
-**Timeline policy:** `.atEnd` — request a new timeline as soon as the current entry is displayed. This pairs with the app's per-poll `WidgetCenter.shared.reloadAllTimelines()` call to achieve real-time updates while the app is running.
+**Timeline policy:** `.after(...)` using the relevant dashboard interval.
+While the app runs, it also reloads each widget kind independently on the same
+schedule.
 
 **History in widgets:** `SystemSnapshot.history` (type `MetricHistory`) carries recent sparkline samples (`cpuHistory`, `memoryHistory`, `downloadHistory`, `uploadHistory`) so widgets render the same charts as the dashboard. Max 60 samples (`AppConstants.sparklineMaxSamples`).
 
@@ -211,11 +216,13 @@ IOKit sensor paths vary across chip generations. `ThermalMonitor` may need per-c
 
 ## Development Workflow
 
-### Polling Interval Changes
+### Refresh Interval Changes
 
-The polling interval setting (`SettingsView`) writes to **both** `UserDefaults.standard` (local) and the App Group via `SharedDataManager.setSharedPollingInterval(_:)`. The running `SystemMonitor` calls `reconcileSharedInterval()` on every poll to pick up changes.
-
-Widgets can also expose the polling rate in their configuration intent (not currently implemented) — if implemented, the same `SharedDataManager` mechanism keeps app and widgets in sync.
+Refresh intervals are configured independently for CPU, memory, disk, network,
+battery, GPU, and processes. The app keeps local preferences in
+`UserDefaults.standard` and mirrors them to the App Group's `preferences.json`
+through `SharedDataManager`. Widget timelines use the corresponding dashboard
+interval.
 
 ### Dashboard Card Reordering
 

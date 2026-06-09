@@ -27,9 +27,6 @@ struct CPUWidgetProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<CPUWidgetEntry>) -> Void) {
-        // .atEnd: re-request as soon as this entry is rendered. While the app
-        // runs it drives frequent reloads (not budget-charged); after a quit
-        // the OS background budget paces this.
         completion(Timeline(entries: [makeEntry()], policy: .atEnd))
     }
 

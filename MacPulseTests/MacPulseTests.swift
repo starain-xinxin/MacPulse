@@ -11,6 +11,54 @@ struct MacPulseTests {
         #expect(AppLanguage.simplifiedChinese.locale.identifier == "zh-Hans")
     }
 
+    @Test func moduleRefreshSettingsClampToSupportedRange() {
+        let settings = ModuleRefreshSettings(cpu: 0, memory: 12)
+
+        #expect(settings.cpu == 1)
+        #expect(settings.memory == 10)
+    }
+
+    @Test func widgetRefreshMatchesTheFastestRelevantDashboardInterval() {
+        let settings = ModuleRefreshSettings(cpu: 2, memory: 5, disk: 10)
+
+        #expect(settings.widgetInterval(for: [.cpu]) == 2)
+        #expect(settings.widgetInterval(for: [.memory]) == 5)
+        #expect(settings.widgetInterval(for: [.cpu, .memory, .disk]) == 2)
+    }
+
+    @Test func byteRateFormatterKeepsTechnicalUnitsInChinese() {
+        let locale = Locale(identifier: "zh-Hans")
+
+        #expect(ByteRateFormatter.string(bytesPerSecond: 512, locale: locale) == "512 B/s")
+        #expect(ByteRateFormatter.string(bytesPerSecond: 1536, locale: locale) == "1.5 KB/s")
+        #expect(
+            ByteRateFormatter.string(
+                bytesPerSecond: 2 * 1024 * 1024,
+                locale: locale
+            ) == "2 MB/s"
+        )
+    }
+
+    @Test func monitorRefreshSchedulingHonorsModuleInterval() {
+        let now = Date(timeIntervalSince1970: 100)
+
+        #expect(SystemMonitor.isDue(lastRefresh: nil, interval: 5, now: now))
+        #expect(
+            !SystemMonitor.isDue(
+                lastRefresh: Date(timeIntervalSince1970: 96),
+                interval: 5,
+                now: now
+            )
+        )
+        #expect(
+            SystemMonitor.isDue(
+                lastRefresh: Date(timeIntervalSince1970: 95),
+                interval: 5,
+                now: now
+            )
+        )
+    }
+
     @Test func memoryMonitorReturnsData() async throws {
         let monitor = MemoryMonitor()
         let data = monitor.fetch()

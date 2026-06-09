@@ -103,8 +103,8 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
 - [x] ~~**GPU monitoring fix**~~ — Use IOAccelerator utilization across Apple Silicon generations and corrected IOReport GPU performance-state sampling as fallback
 - [ ] **Temperature sensors** — Map correct IOKit/IOHIDSensor paths for each Apple Silicon chip variant
-- [x] ~~**Widget refresh**~~ — Widgets read App Group data and now update at **second-level cadence while the app runs**: the app writes a snapshot and reloads timelines every poll, and providers use the `.atEnd` policy. Foreground/active reloads bypass WidgetKit's background budget (after a full quit, the OS background rate applies). Widgets now also show dashboard-style sparkline charts.
-- [x] ~~**Adjustable refresh rate**~~ — Polling interval setting is now wired to the live monitor (default **1s**; the picker previously had no effect)
+- [x] ~~**Widget refresh**~~ — Widgets read App Group data and use the same refresh interval as the corresponding dashboard module while the app runs. After a full quit, the OS background rate applies.
+- [x] ~~**Adjustable refresh rate**~~ — CPU, memory, disk, network, battery, GPU, and process monitoring each have an independent **1-10s** refresh interval.
 - [ ] **Notification alerts** — Optional alerts when CPU/memory/disk exceeds thresholds
 - [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
 - [x] ~~**Localization**~~ — Chinese (Simplified) and English UI with an in-app language selector shared by the app and widgets

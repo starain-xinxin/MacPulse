@@ -195,7 +195,7 @@ struct NetworkWidgetView: View {
     }
 
     private func formatSpeed(_ bytes: UInt64) -> String {
-        ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .memory) + "/s"
+        ByteRateFormatter.string(bytesPerSecond: bytes, locale: locale)
     }
 
     private var interfaceNameKey: LocalizedStringKey {
