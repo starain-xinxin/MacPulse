@@ -391,6 +391,7 @@
       }
     },
     "New version available: %@" : {
+      "comment" : "Update available notification",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
