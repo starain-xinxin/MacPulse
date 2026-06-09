@@ -70,7 +70,7 @@ protocol MonitorService {
 - `DiskMonitor` — `FileManager` volume enumeration
 - `NetworkMonitor` — `getifaddrs()` for traffic bytes, CoreWLAN for SSID, HTTP for public IP/geo
 - `BatteryMonitor` — `IOPSCopyPowerSourcesInfo` + IOKit registry
-- `GPUMonitor` — IOReport C API for GPU residency (Apple Silicon integrated GPU)
+- `GPUMonitor` — IOAccelerator performance statistics with IOReport residency fallback
 - `ThermalMonitor` — IOReport for CPU temperature and thermal pressure
 - `SystemInfoProvider` — `sysctlbyname()` for chip model, OS version, uptime
 
@@ -183,14 +183,11 @@ On macOS Sonoma+, reading Wi-Fi SSID via CoreWLAN requires `CoreLocation` author
 
 ## Known Issues & Debugging
 
-### GPU Usage Always 0%
+### GPU Usage Sampling
 
-IOReport subscription/sampling logic may not work on all M-series chips. The `GPUMonitor` setup is correct for M1 but may need chip-specific channel adjustments for M2/M3/M4.
+`GPUMonitor` reads `PerformanceStatistics` from the `IOAccelerator` service, preferring `Device Utilization %` and supporting alternate driver keys. IOReport is retained as a fallback and samples only the `GPU Performance States` / `GPUPH` channel.
 
-**To debug:**
-1. Verify `IOReportCopyChannelsInGroup("GPU Stats", ...)` returns non-nil
-2. Check channel names via `IOReportChannelGetChannelName(channel)`
-3. Print state names via `IOReportStateGetNameForIndex(channel, i)` to see what states are available
+When changing the fallback, keep the channel dictionary separate from the subscription object when calling `IOReportCreateSamples`. GPU Stats contains many unrelated state channels, so do not aggregate every state-formatted channel in the group.
 
 ### CPU Temperature Not Displaying
 

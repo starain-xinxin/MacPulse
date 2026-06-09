@@ -31,6 +31,29 @@ struct MacPulseTests {
         #expect(disks[0].totalBytes > 0)
     }
 
+    @Test func gpuUtilizationUsesDriverPreferredKeyAndNormalizesPercentage() {
+        let statistics: [String: Any] = [
+            "Device Utilization %": 37,
+            "Renderer Utilization %": 82
+        ]
+
+        #expect(GPUMonitor.utilization(from: statistics) == 0.37)
+    }
+
+    @Test func gpuUtilizationSupportsAlternateDriverKeyAndClampsValue() {
+        let statistics: [String: Any] = ["GPU Activity(%)": NSNumber(value: 145)]
+
+        #expect(GPUMonitor.utilization(from: statistics) == 1)
+        #expect(GPUMonitor.utilization(from: [:]) == nil)
+    }
+
+    @Test func gpuMonitorReturnsAValidLiveSample() {
+        let data = GPUMonitor().fetch()
+
+        #expect((0...1).contains(data.activeUsage))
+        #expect(!data.gpuName.isEmpty)
+    }
+
     @Test func systemInfoProviderReturnsData() async throws {
         let provider = SystemInfoProvider()
         let info = provider.fetch()
