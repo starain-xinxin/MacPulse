@@ -6,6 +6,7 @@ struct SystemOverviewWidgetView: View {
     let entry: SystemOverviewEntry
 
     @Environment(\.widgetFamily) var family
+    @Environment(\.locale) private var locale
 
     private var memoryUsage: Double {
         entry.snapshot.memory.totalBytes > 0
@@ -66,7 +67,13 @@ struct SystemOverviewWidgetView: View {
                 }
                 if let disk = entry.snapshot.disks.first {
                     let free = ByteCountFormatter.string(fromByteCount: Int64(disk.freeBytes), countStyle: .file)
-                    overviewRow("internaldrive", "\(free) free")
+                    overviewRow(
+                        "internaldrive",
+                        String(
+                            format: String(localized: "%@ free", locale: locale),
+                            free
+                        )
+                    )
                 }
                 overviewRow("arrow.down", formatSpeed(entry.snapshot.network.downloadBytesPerSecond))
                 overviewRow("arrow.up", formatSpeed(entry.snapshot.network.uploadBytesPerSecond))
@@ -121,7 +128,11 @@ struct SystemOverviewWidgetView: View {
         }
     }
 
-    private func miniGauge(_ label: String, _ value: Double, _ color: Color) -> some View {
+    private func miniGauge(
+        _ label: LocalizedStringKey,
+        _ value: Double,
+        _ color: Color
+    ) -> some View {
         VStack(spacing: 4) {
             ZStack {
                 Circle()
@@ -154,7 +165,11 @@ struct SystemOverviewWidgetView: View {
         }
     }
 
-    private func detailRow(_ label: String, _ value: String, _ icon: String) -> some View {
+    private func detailRow(
+        _ label: LocalizedStringKey,
+        _ value: String,
+        _ icon: String
+    ) -> some View {
         HStack {
             Image(systemName: icon)
                 .font(.caption2)

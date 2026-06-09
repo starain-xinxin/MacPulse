@@ -22,6 +22,13 @@ enum DockVisibilityController {
 enum TemperatureUnit: String, CaseIterable {
     case celsius = "Celsius"
     case fahrenheit = "Fahrenheit"
+
+    var label: LocalizedStringKey {
+        switch self {
+        case .celsius: return "Celsius"
+        case .fahrenheit: return "Fahrenheit"
+        }
+    }
 }
 
 enum PollingInterval: Double, CaseIterable {

@@ -6,6 +6,7 @@ struct BatteryWidgetView: View {
     let entry: BatteryWidgetEntry
 
     @Environment(\.widgetFamily) var family
+    @Environment(\.locale) private var locale
 
     var body: some View {
         if let battery = entry.batteryData {
@@ -49,7 +50,7 @@ struct BatteryWidgetView: View {
             }
             .frame(width: 70, height: 70)
 
-            Text(data.isCharging ? "Charging" : "On Battery")
+            Text(data.isCharging ? LocalizedStringKey("Charging") : LocalizedStringKey("On Battery"))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
@@ -75,7 +76,7 @@ struct BatteryWidgetView: View {
         }
     }
 
-    private func metricRow(_ label: String, _ value: String) -> some View {
+    private func metricRow(_ label: LocalizedStringKey, _ value: String) -> some View {
         HStack {
             Text(label).font(.caption2).foregroundStyle(.secondary)
             Spacer()
@@ -92,6 +93,16 @@ struct BatteryWidgetView: View {
     private func formatDuration(_ interval: TimeInterval) -> String {
         let h = Int(interval) / 3600
         let m = (Int(interval) % 3600) / 60
-        return h > 0 ? "\(h)h \(m)m" : "\(m)m"
+        if h > 0 {
+            return String(
+                format: String(localized: "%lldh %lldm", locale: locale),
+                Int64(h),
+                Int64(m)
+            )
+        }
+        return String(
+            format: String(localized: "%lldm", locale: locale),
+            Int64(m)
+        )
     }
 }

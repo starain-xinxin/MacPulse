@@ -4,6 +4,7 @@ import MacPulseShared
 struct BatteryCardView: View {
     let data: BatteryData
     var useFahrenheit: Bool = false
+    @Environment(\.locale) private var locale
 
     var body: some View {
         CardContainer(title: "Battery", icon: batteryIcon) {
@@ -17,7 +18,7 @@ struct BatteryCardView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     MetricRowView(
                         label: "Status",
-                        value: statusText,
+                        localizedValue: statusText,
                         valueColor: data.isCharging ? .green : .primary
                     )
                     MetricRowView(
@@ -51,18 +52,26 @@ struct BatteryCardView: View {
         }
     }
 
-    private var statusText: String {
+    private var statusText: LocalizedStringKey {
         if data.isCharging { return "Charging" }
         if data.isPluggedIn { return "Plugged In" }
         return "On Battery"
     }
 
     private var remainingText: String? {
-        if data.isCharging, let time = Formatters.timeRemaining(data.timeToFull) {
-            return "\(time) until full"
+        if data.isCharging,
+           let time = Formatters.timeRemaining(data.timeToFull, locale: locale) {
+            return String(
+                format: String(localized: "%@ until full", locale: locale),
+                time
+            )
         }
-        if !data.isCharging, let time = Formatters.timeRemaining(data.timeToEmpty) {
-            return "\(time) remaining"
+        if !data.isCharging,
+           let time = Formatters.timeRemaining(data.timeToEmpty, locale: locale) {
+            return String(
+                format: String(localized: "%@ remaining", locale: locale),
+                time
+            )
         }
         return nil
     }

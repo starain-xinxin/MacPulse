@@ -7,6 +7,7 @@ struct BatteryWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: BatteryWidgetProvider()) { entry in
             BatteryWidgetView(entry: entry)
+                .modifier(WidgetLanguageModifier())
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Battery")

@@ -4,6 +4,7 @@ import MacPulseShared
 struct MenuBarView: View {
     @Bindable var viewModel: DashboardViewModel
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -49,7 +50,10 @@ struct MenuBarView: View {
                     menuRow(
                         icon: "internaldrive",
                         label: "Disk",
-                        value: "\(Formatters.byteCount(disk.freeBytes)) free"
+                        value: String(
+                            format: String(localized: "%@ free", locale: locale),
+                            Formatters.byteCount(disk.freeBytes)
+                        )
                     )
                 }
             }
@@ -74,7 +78,11 @@ struct MenuBarView: View {
         .frame(width: 260)
     }
 
-    private func menuRow(icon: String, label: String, value: String) -> some View {
+    private func menuRow(
+        icon: String,
+        label: LocalizedStringKey,
+        value: String
+    ) -> some View {
         HStack {
             Image(systemName: icon)
                 .frame(width: 20)

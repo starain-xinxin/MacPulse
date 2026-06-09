@@ -7,6 +7,7 @@ struct MemoryWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: MemoryWidgetProvider()) { entry in
             MemoryWidgetView(entry: entry)
+                .modifier(WidgetLanguageModifier())
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Memory")

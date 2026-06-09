@@ -5,6 +5,12 @@ import MacPulseShared
 
 struct MacPulseTests {
 
+    @Test func appLanguagesExposeExpectedLocales() {
+        #expect(AppLanguage.system.locale == .autoupdatingCurrent)
+        #expect(AppLanguage.english.locale.identifier == "en")
+        #expect(AppLanguage.simplifiedChinese.locale.identifier == "zh-Hans")
+    }
+
     @Test func memoryMonitorReturnsData() async throws {
         let monitor = MemoryMonitor()
         let data = monitor.fetch()

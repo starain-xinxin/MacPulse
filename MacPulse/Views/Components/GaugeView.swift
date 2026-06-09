@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CircularGaugeView: View {
     let value: Double
-    let label: String
+    let label: LocalizedStringKey
     let color: Color
     var lineWidth: CGFloat = 8
     var size: CGFloat = 80

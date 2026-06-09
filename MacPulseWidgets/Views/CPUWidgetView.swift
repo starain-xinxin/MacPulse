@@ -67,7 +67,7 @@ struct CPUWidgetView: View {
         }
     }
 
-    private func metricRow(_ label: String, _ value: String) -> some View {
+    private func metricRow(_ label: LocalizedStringKey, _ value: String) -> some View {
         HStack {
             Text(label)
                 .font(.caption2)

@@ -102,7 +102,7 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [x] ~~**Adjustable refresh rate**~~ — Polling interval setting is now wired to the live monitor (default **1s**; the picker previously had no effect)
 - [ ] **Notification alerts** — Optional alerts when CPU/memory/disk exceeds thresholds
 - [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
-- [ ] **Localization** — Chinese (Simplified) and English UI
+- [x] ~~**Localization**~~ — Chinese (Simplified) and English UI with an in-app language selector shared by the app and widgets
 
 ## License
 

@@ -1,5 +1,7 @@
 import SwiftUI
 import ServiceManagement
+import WidgetKit
+import MacPulseShared
 
 struct SettingsView: View {
     @Bindable var viewModel: DashboardViewModel
@@ -8,10 +10,23 @@ struct SettingsView: View {
     @AppStorage("temperatureUnit") private var temperatureUnit: String = TemperatureUnit.celsius.rawValue
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = false
     @AppStorage(DockVisibilityController.preferenceKey) private var showDockIcon: Bool = false
+    @AppStorage(
+        AppLanguage.preferenceKey,
+        store: AppLanguage.sharedDefaults
+    ) private var appLanguage = AppLanguage.system.rawValue
 
     var body: some View {
         Form {
             Section("General") {
+                Picker("Language", selection: $appLanguage) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(languageLabel(language)).tag(language.rawValue)
+                    }
+                }
+                .onChange(of: appLanguage) {
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+
                 Picker("Polling Interval", selection: $pollingInterval) {
                     ForEach(PollingInterval.allCases, id: \.rawValue) { interval in
                         Text(interval.label).tag(interval.rawValue)
@@ -23,7 +38,7 @@ struct SettingsView: View {
 
                 Picker("Temperature Unit", selection: $temperatureUnit) {
                     ForEach(TemperatureUnit.allCases, id: \.rawValue) { unit in
-                        Text(unit.rawValue).tag(unit.rawValue)
+                        Text(unit.label).tag(unit.rawValue)
                     }
                 }
 
@@ -52,6 +67,14 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 290)
+        .frame(width: 420, height: 330)
+    }
+
+    private func languageLabel(_ language: AppLanguage) -> LocalizedStringKey {
+        switch language {
+        case .system: return "System Default"
+        case .english: return "English"
+        case .simplifiedChinese: return "Simplified Chinese"
+        }
     }
 }

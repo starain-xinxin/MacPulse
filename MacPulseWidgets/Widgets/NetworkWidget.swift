@@ -7,6 +7,7 @@ struct NetworkWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: NetworkWidgetProvider()) { entry in
             NetworkWidgetView(entry: entry)
+                .modifier(WidgetLanguageModifier())
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Network")

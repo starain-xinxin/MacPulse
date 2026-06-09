@@ -36,7 +36,7 @@ struct MemoryCardView: View {
             HStack {
                 MetricRowView(
                     label: "Pressure",
-                    value: data.pressure.rawValue.capitalized,
+                    localizedValue: pressureText,
                     valueColor: pressureColor
                 )
                 Spacer()
@@ -68,6 +68,14 @@ struct MemoryCardView: View {
         case .critical: return .red
         case .warning: return .orange
         case .nominal: return .green
+        }
+    }
+
+    private var pressureText: LocalizedStringKey {
+        switch data.pressure {
+        case .nominal: return "Nominal"
+        case .warning: return "Warning"
+        case .critical: return "Critical"
         }
     }
 }

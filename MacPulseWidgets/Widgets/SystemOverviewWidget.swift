@@ -7,6 +7,7 @@ struct SystemOverviewWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: SystemOverviewProvider()) { entry in
             SystemOverviewWidgetView(entry: entry)
+                .modifier(WidgetLanguageModifier())
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("System Overview")
