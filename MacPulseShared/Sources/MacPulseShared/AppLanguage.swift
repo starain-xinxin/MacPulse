@@ -20,7 +20,4 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    public static var sharedDefaults: UserDefaults {
-        UserDefaults(suiteName: "group.starain.MacPulse") ?? .standard
-    }
 }

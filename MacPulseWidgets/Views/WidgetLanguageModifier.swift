@@ -2,15 +2,12 @@ import SwiftUI
 import MacPulseShared
 
 struct WidgetLanguageModifier: ViewModifier {
-    @AppStorage(
-        AppLanguage.preferenceKey,
-        store: AppLanguage.sharedDefaults
-    ) private var appLanguage = AppLanguage.system.rawValue
+    private let sharedDataManager = SharedDataManager()
 
     func body(content: Content) -> some View {
         content.environment(
             \.locale,
-            (AppLanguage(rawValue: appLanguage) ?? .system).locale
+            sharedDataManager.sharedAppLanguage.locale
         )
     }
 }

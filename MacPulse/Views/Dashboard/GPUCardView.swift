@@ -7,7 +7,7 @@ struct GPUCardView: View {
     var useFahrenheit: Bool = false
 
     var body: some View {
-        CardContainer(title: "GPU", icon: "gpu") {
+        CardContainer(title: "GPU", icon: "display") {
             HStack(spacing: 16) {
                 CircularGaugeView(
                     value: data.activeUsage,

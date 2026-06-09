@@ -4,6 +4,7 @@ import MacPulseShared
 struct MemoryCardView: View {
     let data: MemoryData
     let history: [Double]
+    let topProcesses: [ProcessMetric]
 
     var body: some View {
         CardContainer(title: "Memory", icon: "memorychip") {
@@ -48,6 +49,8 @@ struct MemoryCardView: View {
             if history.count > 1 {
                 SparklineView(data: history, color: memoryColor, maxValue: 1.0)
             }
+
+            TopProcessListView(processes: topProcesses, metric: .memory)
         }
     }
 

@@ -4,6 +4,10 @@ import MacPulseShared
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         DockVisibilityController.applySavedPreference()
+        let language = AppLanguage(
+            rawValue: UserDefaults.standard.string(forKey: AppLanguage.preferenceKey) ?? ""
+        ) ?? .system
+        try? SharedDataManager().setSharedAppLanguage(language)
     }
 }
 
@@ -11,10 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 struct MacPulseApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var viewModel = DashboardViewModel()
-    @AppStorage(
-        AppLanguage.preferenceKey,
-        store: AppLanguage.sharedDefaults
-    ) private var appLanguage = AppLanguage.system.rawValue
+    @AppStorage(AppLanguage.preferenceKey) private var appLanguage = AppLanguage.system.rawValue
 
     private var locale: Locale {
         (AppLanguage(rawValue: appLanguage) ?? .system).locale

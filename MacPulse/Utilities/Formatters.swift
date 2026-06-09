@@ -1,4 +1,5 @@
 import Foundation
+import MacPulseShared
 
 enum Formatters {
     static func byteCount(_ bytes: UInt64) -> String {
@@ -25,10 +26,7 @@ enum Formatters {
     }
 
     static func bytesPerSecond(_ bytes: UInt64) -> String {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .memory
-        formatter.allowedUnits = [.useAll]
-        return formatter.string(fromByteCount: Int64(bytes)) + "/s"
+        ByteRateFormatter.string(bytesPerSecond: bytes)
     }
 
     static func duration(

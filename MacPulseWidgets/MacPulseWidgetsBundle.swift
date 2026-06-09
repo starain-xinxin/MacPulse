@@ -10,5 +10,6 @@ struct MacPulseWidgetsBundle: WidgetBundle {
         NetworkWidget()
         SystemOverviewWidget()
         SystemStatsWidget()
+        TopProcessesWidget()
     }
 }
