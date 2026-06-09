@@ -51,12 +51,14 @@ final class SystemMonitor {
         // Initial fetch
         Task { await poll() }
 
-        timer = Timer.scheduledTimer(withTimeInterval: pollingInterval, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: pollingInterval, repeats: true) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
                 await self.poll()
             }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
     }
 
     func stop() {

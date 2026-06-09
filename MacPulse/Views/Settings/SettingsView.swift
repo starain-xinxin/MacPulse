@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("pollingInterval") private var pollingInterval: Double = AppConstants.defaultPollingInterval
     @AppStorage("temperatureUnit") private var temperatureUnit: String = TemperatureUnit.celsius.rawValue
     @AppStorage("launchAtLogin") private var launchAtLogin: Bool = false
+    @AppStorage(DockVisibilityController.preferenceKey) private var showDockIcon: Bool = false
 
     var body: some View {
         Form {
@@ -38,6 +39,11 @@ struct SettingsView: View {
                             launchAtLogin = !newValue
                         }
                     }
+
+                Toggle("Show in Dock", isOn: $showDockIcon)
+                    .onChange(of: showDockIcon) { _, newValue in
+                        DockVisibilityController.apply(showDockIcon: newValue)
+                    }
             }
 
             Section("About") {
@@ -46,6 +52,6 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 260)
+        .frame(width: 400, height: 290)
     }
 }
