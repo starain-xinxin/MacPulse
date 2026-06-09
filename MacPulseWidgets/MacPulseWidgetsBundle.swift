@@ -4,11 +4,8 @@ import WidgetKit
 @main
 struct MacPulseWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        CPUWidget()
-        MemoryWidget()
-        BatteryWidget()
+        GPUWidget()
         NetworkWidget()
-        SystemOverviewWidget()
         SystemStatsWidget()
         TopProcessesWidget()
     }

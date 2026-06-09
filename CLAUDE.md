@@ -37,7 +37,7 @@ xcodebuild test -scheme MacPulse -destination 'platform=macOS'
 ### Three-Target Structure
 
 1. **MacPulse.app** — Main application with dashboard, menu bar, settings
-2. **MacPulseWidgets** — WidgetKit extension providing 7 desktop widgets
+2. **MacPulseWidgets** — WidgetKit extension providing 4 desktop widgets (medium size only)
 3. **MacPulseShared** — Local Swift package shared between app and widgets
 
 ### Data Flow
@@ -122,8 +122,11 @@ setting reloads WidgetKit timelines.
 
 ### Widget Architecture
 
-**7 Widgets in `MacPulseWidgets/`:**
-- CPUWidget, MemoryWidget, BatteryWidget, NetworkWidget, SystemOverviewWidget, SystemStatsWidget, TopProcessesWidget
+**4 Widgets in `MacPulseWidgets/` (all medium size only):**
+- GPUWidget — GPU usage, temperature, and thermal pressure
+- NetworkWidget — Network status and traffic
+- SystemStatsWidget — CPU·RAM·Disk combined view
+- TopProcessesWidget — Top processes by CPU and memory
 
 **Structure per widget:**
 - `Providers/<Name>Provider.swift` — `TimelineProvider` reading from App Group
