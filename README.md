@@ -1,6 +1,10 @@
-# MacPulse
+<p align="center">
+  <img src="icon/MacPulse.png" alt="MacPulse icon" width="160">
+</p>
 
-A lightweight, native macOS system monitor for Apple Silicon MacBooks.
+<h1 align="center">MacPulse</h1>
+
+<p align="center">A lightweight, native macOS system monitor for Apple Silicon MacBooks.</p>
 
 Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift calling macOS system APIs directly, keeping CPU and memory overhead minimal.
 
@@ -27,7 +31,13 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 
 ## Screenshots
 
-> Screenshots will be added after the UI is stabilized.
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Desktop Widgets
+
+![Widgets](screenshots/widget.png)
 
 ## Requirements
 
