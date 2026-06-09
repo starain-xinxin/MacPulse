@@ -82,6 +82,19 @@ protocol MonitorService {
 services with a one-second scheduler. Each service is sampled only when its own
 configured interval is due.
 
+### Update Checker
+
+`UpdateChecker` (`MacPulse/Services/UpdateChecker.swift`) queries the GitHub Releases API on app launch to check for newer versions. It's a `@MainActor @Observable` singleton that:
+
+- Fetches the latest release from `https://api.github.com/repos/starain-xinxin/MacPulse/releases/latest`
+- Compares semantic versions (strips `v` prefix, compares `major.minor.patch` numerically)
+- Stores `lastCheckDate` in `UserDefaults` (no persistent nag if dismissed)
+- Surfaces update state in `MenuBarView` (green badge) and `SettingsView` (download button)
+
+The app **never auto-installs** updates — clicking "Download Update" opens the GitHub release page in the browser. This avoids third-party frameworks (like Sparkle) and stays within the "zero dependencies" design constraint.
+
+### App Sandbox
+
 The main app intentionally runs outside App Sandbox because macOS blocks
 `libproc` access to other processes from a sandboxed process. The WidgetKit
 extension remains sandboxed. Re-enabling the main app sandbox makes both top

@@ -8,6 +8,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             rawValue: UserDefaults.standard.string(forKey: AppLanguage.preferenceKey) ?? ""
         ) ?? .system
         try? SharedDataManager().setSharedAppLanguage(language)
+
+        // Check for updates on launch (silent — only surfaces if an update exists)
+        Task { @MainActor in
+            await UpdateChecker.shared.checkForUpdates()
+        }
     }
 }
 
