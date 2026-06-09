@@ -3,6 +3,7 @@ import MacPulseShared
 
 struct MenuBarView: View {
     @Bindable var viewModel: DashboardViewModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -54,6 +55,15 @@ struct MenuBarView: View {
             }
 
             Divider()
+
+            Button("Open MacPulse") {
+                openWindow(id: AppWindow.dashboardID)
+                NSApplication.shared.activate(ignoringOtherApps: true)
+            }
+
+            SettingsLink {
+                Text("Settings...")
+            }
 
             Button("Quit MacPulse") {
                 NSApplication.shared.terminate(nil)
