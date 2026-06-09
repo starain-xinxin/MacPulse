@@ -69,6 +69,7 @@ MacPulseWidgets/       # WidgetKit extension
 **Data flow:** Monitors poll system APIs at the configured interval (default 1s, shared with widgets via the App Group) → SystemMonitor assembles a `SystemSnapshot` → Dashboard UI updates via `@Observable` → Snapshot is written to App Group JSON every poll → Widgets read it via TimelineProvider.
 
 **Key technical details:**
+- IOAccelerator performance statistics with IOReport residency fallback for GPU usage
 - IOReport C API (via bridging header + `libIOReport`) for GPU residency and thermal data
 - `host_processor_info()` / `host_statistics64()` for CPU and memory
 - `getifaddrs()` for network traffic bytes and local IPs
@@ -85,7 +86,7 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [x] ~~Dashboard card layout does not adapt well to different window sizes; cards are not draggable/reorderable~~ (Fixed: masonry layout + drag-and-drop)
 - [x] ~~Public IP / geolocation not displaying~~ (Fixed: migrated to HTTPS endpoint with `success`/error handling — cleartext HTTP was blocked by App Transport Security)
 - [x] ~~Only local IP is shown; Wi-Fi SSID name is not retrieved~~ (Fixed: SSID via CoreWLAN, gated by CoreLocation authorization required on macOS Sonoma+)
-- [ ] GPU usage always reads 0% (IOReport subscription/sampling logic needs debugging on specific M-series chips)
+- [x] ~~GPU usage always reads 0%~~ (Fixed: read IOAccelerator utilization with corrected IOReport performance-state sampling as fallback)
 - [ ] CPU temperature may not display (IOKit sensor paths vary across M1/M2/M3/M4 models)
 
 ### Planned Features
@@ -95,7 +96,7 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [x] ~~**Draggable dashboard**~~ — Cards are now drag-and-drop reorderable with persisted order
 - [x] ~~**Responsive layout**~~ — Custom masonry layout adapts to window width
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
-- [ ] **GPU monitoring fix** — Debug and fix IOReport GPU Stats channel sampling for each M-series generation
+- [x] ~~**GPU monitoring fix**~~ — Use IOAccelerator utilization across Apple Silicon generations and corrected IOReport GPU performance-state sampling as fallback
 - [ ] **Temperature sensors** — Map correct IOKit/IOHIDSensor paths for each Apple Silicon chip variant
 - [x] ~~**Widget refresh**~~ — Widgets read App Group data and now update at **second-level cadence while the app runs**: the app writes a snapshot and reloads timelines every poll, and providers use the `.atEnd` policy. Foreground/active reloads bypass WidgetKit's background budget (after a full quit, the OS background rate applies). Widgets now also show dashboard-style sparkline charts.
 - [x] ~~**Adjustable refresh rate**~~ — Polling interval setting is now wired to the live monitor (default **1s**; the picker previously had no effect)
