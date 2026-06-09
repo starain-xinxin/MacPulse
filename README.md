@@ -22,7 +22,7 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 |-----------|-------------|
 | **Dashboard Window** | Main window with a grid of metric cards, gauges, and sparklines |
 | **Menu Bar** | MenuBarExtra showing key metrics at a glance |
-| **Desktop Widgets** | 7 WidgetKit widgets, including a dedicated split-view Top Processes widget, with second-level refresh while the app runs |
+| **Desktop Widgets** | 4 medium WidgetKit widgets — GPU, Network, CPU·RAM·Disk, and a split-view Top Processes widget — with second-level refresh while the app runs |
 | **Settings** | Polling interval (default 1s, applied live), temperature unit, launch at login |
 
 ## Screenshots
