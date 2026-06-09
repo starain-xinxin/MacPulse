@@ -5,6 +5,7 @@ import MacPulseShared
 
 struct SettingsView: View {
     @Bindable var viewModel: DashboardViewModel
+    @Bindable private var updateChecker = UpdateChecker.shared
 
     @AppStorage(ModuleRefreshSettings.cpuPreferenceKey)
     private var cpuRefreshInterval = ModuleRefreshSettings.default.cpu
@@ -104,14 +105,58 @@ struct SettingsView: View {
             Section("About") {
                 LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
                 LabeledContent("Build", value: Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1")
+
+                updateRow
             }
         }
         .formStyle(.grouped)
-        .frame(width: 440, height: 570)
+        .frame(width: 440, height: 620)
         .onAppear {
             try? sharedDataManager.setSharedAppLanguage(
                 AppLanguage(rawValue: appLanguage) ?? .system
             )
+        }
+    }
+
+    @ViewBuilder
+    private var updateRow: some View {
+        if let update = updateChecker.availableUpdate {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .foregroundStyle(.green)
+                    Text("New version available: \(update.tagName)", comment: "Update available notification")
+                        .fontWeight(.medium)
+                }
+                Button("Download Update") {
+                    updateChecker.openReleasePage()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        } else {
+            LabeledContent {
+                HStack(spacing: 8) {
+                    if updateChecker.isChecking {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else if let error = updateChecker.errorMessage {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .lineLimit(1)
+                    } else if updateChecker.lastCheckDate != nil {
+                        Text("Up to date")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Button("Check for Updates") {
+                        Task { await updateChecker.checkForUpdates() }
+                    }
+                    .disabled(updateChecker.isChecking)
+                }
+            } label: {
+                Text("Updates")
+            }
         }
     }
 

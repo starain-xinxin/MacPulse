@@ -3,14 +3,22 @@ import MacPulseShared
 
 struct MenuBarView: View {
     @Bindable var viewModel: DashboardViewModel
+    @Bindable private var updateChecker = UpdateChecker.shared
     @Environment(\.openWindow) private var openWindow
     @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("MacPulse")
-                .font(.headline)
-                .padding(.bottom, 4)
+            HStack {
+                Text("MacPulse")
+                    .font(.headline)
+                if updateChecker.availableUpdate != nil {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .foregroundStyle(.green)
+                        .imageScale(.small)
+                }
+            }
+            .padding(.bottom, 4)
 
             Group {
                 menuRow(
@@ -59,6 +67,14 @@ struct MenuBarView: View {
             }
 
             Divider()
+
+            if updateChecker.availableUpdate != nil {
+                Button {
+                    updateChecker.openReleasePage()
+                } label: {
+                    Label("Download Update", systemImage: "arrow.down.circle.fill")
+                }
+            }
 
             Button("Open MacPulse") {
                 openWindow(id: AppWindow.dashboardID)

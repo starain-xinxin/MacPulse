@@ -27,7 +27,7 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 | **Dashboard Window** | Main window with a grid of metric cards, gauges, and sparklines |
 | **Menu Bar** | MenuBarExtra showing key metrics at a glance |
 | **Desktop Widgets** | 4 medium WidgetKit widgets — GPU, Network, CPU·RAM·Disk, and a split-view Top Processes widget — with second-level refresh while the app runs |
-| **Settings** | Polling interval (default 1s, applied live), temperature unit, launch at login |
+| **Settings** | Polling interval (default 1s, applied live), temperature unit, launch at login, automatic update checking |
 
 ## Screenshots
 
@@ -103,6 +103,20 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 - [ ] **History persistence** — Store metric history for longer-term sparkline/chart views
 - [ ] **Notification alerts** — Optional alerts when CPU/memory/disk exceeds thresholds
 - [ ] **Export / logging** — Export system metrics to CSV or JSON for analysis
+
+
+## Updates
+
+MacPulse checks for new versions on launch (and on demand from **Settings → About → Check for Updates**) by querying the GitHub Releases API. When a newer version is published, a green badge appears in the menu bar and a **Download Update** button shows in Settings. The app does not auto-install — clicking the button opens the release page so you download the DMG and replace the app manually. This keeps the app free of third-party dependencies and avoids code-signing complications.
+
+### Publishing a release (maintainers)
+
+1. Bump `MARKETING_VERSION` in the Xcode project (e.g. `1.0.1` → `1.0.2`)
+2. Archive and export a signed, notarized `.dmg`
+3. Create a GitHub release with a tag matching the version (`v1.0.2` or `1.0.2` — both are accepted), and attach the DMG
+4. Existing installs detect the new tag via the Releases API and prompt users to update
+
+Version comparison is semantic (`major.minor.patch`); a leading `v` is stripped automatically.
 
 
 ## License
