@@ -64,12 +64,14 @@ struct DashboardView: View {
                 data: viewModel.snapshot.cpu,
                 thermal: viewModel.snapshot.thermal,
                 history: viewModel.cpuHistory,
+                topProcesses: viewModel.snapshot.processes.topCPU,
                 useFahrenheit: viewModel.useFahrenheit
             )
         case .memory:
             MemoryCardView(
                 data: viewModel.snapshot.memory,
-                history: viewModel.memoryHistory
+                history: viewModel.memoryHistory,
+                topProcesses: viewModel.snapshot.processes.topMemory
             )
         case .gpu:
             GPUCardView(

@@ -24,6 +24,9 @@
         }
       }
     },
+    "%lld" : {
+
+    },
     "%lldh %lldm" : {
       "localizations" : {
         "zh-Hans" : {
@@ -310,6 +313,16 @@
         }
       }
     },
+    "Monitor the apps using the most CPU and memory." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "监控 CPU 和内存占用最高的应用。"
+          }
+        }
+      }
+    },
     "Network" : {
       "localizations" : {
         "zh-Hans" : {
@@ -326,6 +339,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无电池"
+          }
+        }
+      }
+    },
+    "No process data" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无进程数据"
           }
         }
       }
@@ -459,6 +482,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "温度"
+          }
+        }
+      }
+    },
+    "Top Processes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高占用进程"
           }
         }
       }

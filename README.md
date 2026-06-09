@@ -12,6 +12,7 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 - **Network Monitoring** — Upload/download speed, total traffic, interface type, local IP, Wi-Fi SSID, public IP with geolocation
 - **Battery Monitoring** — Charge level, health percentage, cycle count, temperature, time remaining
 - **GPU Monitoring** — Active usage via IOReport API (Apple Silicon integrated GPU)
+- **Top Processes** — Highest CPU and resident-memory consumers inside the CPU and Memory cards
 - **Thermal Monitoring** — CPU temperature, system thermal pressure level
 - **System Info** — Model, chip name, macOS version, uptime
 
@@ -21,7 +22,7 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 |-----------|-------------|
 | **Dashboard Window** | Main window with a grid of metric cards, gauges, and sparklines |
 | **Menu Bar** | MenuBarExtra showing key metrics at a glance |
-| **Desktop Widgets** | 6 WidgetKit widgets (CPU, Memory, Battery, Network, System Overview, CPU·RAM·Disk) with sparkline charts and second-level refresh while the app runs |
+| **Desktop Widgets** | 7 WidgetKit widgets, including a dedicated split-view Top Processes widget, with second-level refresh while the app runs |
 | **Settings** | Polling interval (default 1s, applied live), temperature unit, launch at login |
 
 ## Screenshots
@@ -76,6 +77,10 @@ MacPulseWidgets/       # WidgetKit extension
 - `IOPSCopyPowerSourcesInfo` + IOKit registry for battery details
 - App Group (`group.starain.MacPulse`) for widget data sharing
 
+The main app runs outside App Sandbox so it can read system-wide process
+statistics through `libproc`; the WidgetKit extension remains sandboxed and
+only reads the shared snapshot.
+
 ## Roadmap
 
 This is an early-stage build. The core monitoring infrastructure works, but there are known issues and many planned improvements:
@@ -91,7 +96,7 @@ This is an early-stage build. The core monitoring infrastructure works, but ther
 
 ### Planned Features
 
-- [ ] **Top processes** — Show top CPU/memory consuming processes per metric card (via `sysctl` / `proc_pidinfo`)
+- [x] ~~**Top processes**~~ — Show top CPU/memory consumers in the metric cards and a dedicated split-view WidgetKit widget (via `proc_listallpids` / `proc_pidinfo`)
 - [x] ~~**Network details**~~ — Wi-Fi SSID display (CoreWLAN), public IP with geolocation (HTTPS), CoreLocation authorization to unlock SSID
 - [x] ~~**Draggable dashboard**~~ — Cards are now drag-and-drop reorderable with persisted order
 - [x] ~~**Responsive layout**~~ — Custom masonry layout adapts to window width

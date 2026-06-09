@@ -2,6 +2,7 @@
 #define MacPulse_Bridging_Header_h
 
 #include <IOKit/IOKitLib.h>
+#include <libproc.h>
 #include <mach/mach_host.h>
 #include <mach/processor_info.h>
 #include <ifaddrs.h>

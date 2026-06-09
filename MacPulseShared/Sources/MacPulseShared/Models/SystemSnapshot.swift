@@ -10,6 +10,7 @@ public struct SystemSnapshot: Codable, Sendable {
     public var gpu: GPUData
     public var thermal: ThermalData
     public var systemInfo: SystemInfoData
+    public var processes: ProcessData
     public var history: MetricHistory
 
     public init(
@@ -22,6 +23,7 @@ public struct SystemSnapshot: Codable, Sendable {
         gpu: GPUData = .empty,
         thermal: ThermalData = .empty,
         systemInfo: SystemInfoData = .empty,
+        processes: ProcessData = .empty,
         history: MetricHistory = .empty
     ) {
         self.timestamp = timestamp
@@ -33,10 +35,40 @@ public struct SystemSnapshot: Codable, Sendable {
         self.gpu = gpu
         self.thermal = thermal
         self.systemInfo = systemInfo
+        self.processes = processes
         self.history = history
     }
 
     public static let empty = SystemSnapshot()
+
+    private enum CodingKeys: String, CodingKey {
+        case timestamp
+        case cpu
+        case memory
+        case disks
+        case network
+        case battery
+        case gpu
+        case thermal
+        case systemInfo
+        case processes
+        case history
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        cpu = try container.decode(CPUData.self, forKey: .cpu)
+        memory = try container.decode(MemoryData.self, forKey: .memory)
+        disks = try container.decode([DiskData].self, forKey: .disks)
+        network = try container.decode(NetworkData.self, forKey: .network)
+        battery = try container.decodeIfPresent(BatteryData.self, forKey: .battery)
+        gpu = try container.decode(GPUData.self, forKey: .gpu)
+        thermal = try container.decode(ThermalData.self, forKey: .thermal)
+        systemInfo = try container.decode(SystemInfoData.self, forKey: .systemInfo)
+        processes = try container.decodeIfPresent(ProcessData.self, forKey: .processes) ?? .empty
+        history = try container.decode(MetricHistory.self, forKey: .history)
+    }
 }
 
 public struct SystemInfoData: Codable, Sendable {

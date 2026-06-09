@@ -37,7 +37,7 @@ xcodebuild test -scheme MacPulse -destination 'platform=macOS'
 ### Three-Target Structure
 
 1. **MacPulse.app** — Main application with dashboard, menu bar, settings
-2. **MacPulseWidgets** — WidgetKit extension providing 6 desktop widgets
+2. **MacPulseWidgets** — WidgetKit extension providing 7 desktop widgets
 3. **MacPulseShared** — Local Swift package shared between app and widgets
 
 ### Data Flow
@@ -72,9 +72,15 @@ protocol MonitorService {
 - `BatteryMonitor` — `IOPSCopyPowerSourcesInfo` + IOKit registry
 - `GPUMonitor` — IOAccelerator performance statistics with IOReport residency fallback
 - `ThermalMonitor` — IOReport for CPU temperature and thermal pressure
+- `ProcessMonitor` — `proc_listallpids()` / `proc_pidinfo()` for top CPU and resident-memory consumers
 - `SystemInfoProvider` — `sysctlbyname()` for chip model, OS version, uptime
 
 `SystemMonitor` (`MacPulse/Services/SystemMonitor.swift`) coordinates all services, runs a Timer at the configured polling interval, and writes snapshots to the App Group.
+
+The main app intentionally runs outside App Sandbox because macOS blocks
+`libproc` access to other processes from a sandboxed process. The WidgetKit
+extension remains sandboxed. Re-enabling the main app sandbox makes both top
+process lists empty at runtime.
 
 ### IOReport C API
 
@@ -113,8 +119,8 @@ setting reloads WidgetKit timelines.
 
 ### Widget Architecture
 
-**6 Widgets in `MacPulseWidgets/`:**
-- CPUWidget, MemoryWidget, BatteryWidget, NetworkWidget, SystemOverviewWidget, SystemStatsWidget
+**7 Widgets in `MacPulseWidgets/`:**
+- CPUWidget, MemoryWidget, BatteryWidget, NetworkWidget, SystemOverviewWidget, SystemStatsWidget, TopProcessesWidget
 
 **Structure per widget:**
 - `Providers/<Name>Provider.swift` — `TimelineProvider` reading from App Group

@@ -19,6 +19,43 @@ struct MacPulseTests {
         #expect(data.totalBytes >= data.usedBytes)
     }
 
+    @Test func processMonitorRanksCPUAndMemoryIndependently() {
+        let metrics = [
+            ProcessMetric(processID: 1, name: "CPU Heavy", cpuUsage: 0.8, memoryBytes: 100),
+            ProcessMetric(processID: 2, name: "Memory Heavy", cpuUsage: 0.2, memoryBytes: 900),
+            ProcessMetric(processID: 3, name: "Balanced", cpuUsage: 0.5, memoryBytes: 500),
+        ]
+
+        let ranked = ProcessMonitor.ranked(metrics, limit: 2)
+
+        #expect(ranked.topCPU.map(\.name) == ["CPU Heavy", "Balanced"])
+        #expect(ranked.topMemory.map(\.name) == ["Memory Heavy", "Balanced"])
+    }
+
+    @Test func processMonitorReturnsLiveMemoryConsumers() {
+        let data = ProcessMonitor(resultLimit: 3).fetch()
+
+        #expect(!data.topMemory.isEmpty)
+        #expect(data.topMemory.count <= 3)
+        #expect(data.topMemory.allSatisfy { $0.memoryBytes > 0 && !$0.name.isEmpty })
+    }
+
+    @Test func processMonitorCalculatesCPUFromConsecutiveSamples() {
+        let monitor = ProcessMonitor(resultLimit: 5)
+        _ = monitor.fetch()
+
+        let deadline = Date().addingTimeInterval(0.1)
+        var accumulator = 0
+        while Date() < deadline {
+            accumulator &+= 1
+        }
+
+        let data = monitor.fetch()
+        #expect(accumulator > 0)
+        #expect(!data.topCPU.isEmpty)
+        #expect(data.topCPU.allSatisfy { $0.cpuUsage > 0 })
+    }
+
     @Test func cpuMonitorReturnsData() async throws {
         let monitor = CPUMonitor()
         // First call initializes previous ticks
@@ -71,12 +108,33 @@ struct MacPulseTests {
     @Test func systemSnapshotCodable() async throws {
         let snapshot = SystemSnapshot(
             cpu: CPUData(overallUsage: 0.5, coreCount: 8, logicalCoreCount: 8),
-            memory: MemoryData(totalBytes: 16_000_000_000, usedBytes: 8_000_000_000)
+            memory: MemoryData(totalBytes: 16_000_000_000, usedBytes: 8_000_000_000),
+            processes: ProcessData(
+                topCPU: [
+                    ProcessMetric(processID: 42, name: "Test App", cpuUsage: 0.25)
+                ]
+            )
         )
         let data = try JSONEncoder().encode(snapshot)
         let decoded = try JSONDecoder().decode(SystemSnapshot.self, from: data)
         #expect(decoded.cpu.overallUsage == 0.5)
         #expect(decoded.memory.totalBytes == 16_000_000_000)
+        #expect(decoded.processes.topCPU.first?.name == "Test App")
+    }
+
+    @Test func systemSnapshotDecodesWithoutProcessData() throws {
+        let snapshot = SystemSnapshot()
+        let encoded = try JSONEncoder().encode(snapshot)
+        var object = try #require(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        object.removeValue(forKey: "processes")
+
+        let legacyData = try JSONSerialization.data(withJSONObject: object)
+        let decoded = try JSONDecoder().decode(SystemSnapshot.self, from: legacyData)
+
+        #expect(decoded.processes.topCPU.isEmpty)
+        #expect(decoded.processes.topMemory.isEmpty)
     }
 
     @Test func networkSparklineIgnoresStalePeakWhenScalingRecentTraffic() {

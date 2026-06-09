@@ -5,6 +5,7 @@ struct CPUCardView: View {
     let data: CPUData
     let thermal: ThermalData
     let history: [Double]
+    let topProcesses: [ProcessMetric]
     var useFahrenheit: Bool = false
 
     var body: some View {
@@ -39,6 +40,8 @@ struct CPUCardView: View {
             if history.count > 1 {
                 SparklineView(data: history, color: cpuColor, maxValue: 1.0)
             }
+
+            TopProcessListView(processes: topProcesses, metric: .cpu)
         }
     }
 

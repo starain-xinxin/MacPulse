@@ -15,6 +15,7 @@ final class SystemMonitor {
     private let batteryMonitor = BatteryMonitor()
     private let gpuMonitor = GPUMonitor()
     private let thermalMonitor = ThermalMonitor()
+    private let processMonitor = ProcessMonitor()
     private let systemInfoProvider = SystemInfoProvider()
     private let sharedDataManager = SharedDataManager()
     let locationManager = LocationManager()
@@ -93,7 +94,7 @@ final class SystemMonitor {
         // whether it is allowed to read the Wi-Fi SSID this cycle.
         networkMonitor.locationAuthorized = locationManager.isAuthorized
 
-        let result = await Task.detached { [cpuMonitor, memoryMonitor, diskMonitor, networkMonitor, batteryMonitor, gpuMonitor, thermalMonitor, systemInfoProvider] in
+        let result = await Task.detached { [cpuMonitor, memoryMonitor, diskMonitor, networkMonitor, batteryMonitor, gpuMonitor, thermalMonitor, processMonitor, systemInfoProvider] in
             let cpu = cpuMonitor.fetch()
             let memory = memoryMonitor.fetch()
             let disks = diskMonitor.fetch()
@@ -101,6 +102,7 @@ final class SystemMonitor {
             let battery = batteryMonitor.fetch()
             let gpu = gpuMonitor.fetch()
             let thermal = thermalMonitor.fetch()
+            let processes = processMonitor.fetch()
             let systemInfo = systemInfoProvider.fetch()
 
             return SystemSnapshot(
@@ -112,7 +114,8 @@ final class SystemMonitor {
                 battery: battery,
                 gpu: gpu,
                 thermal: thermal,
-                systemInfo: systemInfo
+                systemInfo: systemInfo,
+                processes: processes
             )
         }.value
 
