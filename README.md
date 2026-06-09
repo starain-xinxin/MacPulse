@@ -33,11 +33,15 @@ Built with SwiftUI and WidgetKit. No Electron, no web views — just pure Swift 
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+<p align="center">
+  <img src="screenshots/dashboard.png" alt="MacPulse Dashboard" width="50%">
+</p>
 
 ### Desktop Widgets
 
-![Widgets](screenshots/widget.png)
+<p align="center">
+  <img src="screenshots/widget.png" alt="MacPulse Widget" width="50%">
+</p>
 
 ## Requirements
 
@@ -94,9 +98,6 @@ only reads the shared snapshot.
 ## Roadmap
 
 This is an early-stage build. The core monitoring infrastructure works, but there are known issues and many planned improvements:
-
-### Known Issues
-
 
 ### Planned Features
 
